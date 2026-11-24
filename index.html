@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <!-- iOS PWA 原生全螢幕設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="每日計畫" />
-  <title>每日計畫</title>
+  <meta name="apple-mobile-web-app-title" content="極簡計畫" />
+  <link id="appIconLink" rel="apple-touch-icon" sizes="180x180" href="" />
+  <link id="favIconLink" rel="icon" type="image/png" href="" />
+  <title>極簡計畫</title>
   <style>
     :root {
       --bg-primary: #F2F2F7;
@@ -18,9 +19,10 @@
       --accent: #007AFF;
       --green: #34C759;
       --orange: #FF9500;
-      --red: #FF3B30;
+      --purple: #AF52DE;
       --separator: rgba(60, 60, 67, 0.12);
-      --glass: rgba(242, 242, 247, 0.82);
+      --glass: rgba(242, 242, 247, 0.85);
+      --grid-line: rgba(0, 0, 0, 0.055);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -33,9 +35,10 @@
         --accent: #0A84FF;
         --green: #30D158;
         --orange: #FF9F0A;
-        --red: #FF453A;
+        --purple: #BF5AF2;
         --separator: rgba(84, 84, 88, 0.36);
-        --glass: rgba(0, 0, 0, 0.82);
+        --glass: rgba(0, 0, 0, 0.85);
+        --grid-line: rgba(255, 255, 255, 0.06);
       }
     }
 
@@ -55,7 +58,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* 頂部毛玻璃導覽列 */
     header {
       position: sticky;
       top: 0;
@@ -63,7 +65,7 @@
       background: var(--glass);
       backdrop-filter: saturate(180%) blur(20px);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
-      padding: calc(12px + env(safe-area-inset-top)) 20px 12px;
+      padding: calc(10px + env(safe-area-inset-top)) 20px 12px;
       margin-top: calc(-1 * env(safe-area-inset-top));
       border-bottom: 0.5px solid var(--separator);
     }
@@ -71,28 +73,69 @@
     .header-top {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end;
     }
 
     .date-sub {
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
-      letter-spacing: 0.2px;
     }
 
     h1 {
       margin: 2px 0 0;
-      font-size: 30px;
+      font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
 
-    /* 日期橫向選擇器 */
+    .today-btn {
+      background: var(--bg-tertiary);
+      color: var(--accent);
+      border: none;
+      border-radius: 14px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .segmented {
+      display: flex;
+      background: var(--bg-tertiary);
+      border-radius: 9px;
+      padding: 2px;
+      margin-top: 12px;
+    }
+
+    .seg-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 0;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .seg-btn.active {
+      background: var(--bg-secondary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    main {
+      padding: 16px 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
     .date-strip {
       display: flex;
       justify-content: space-between;
-      margin-top: 14px;
+      margin-bottom: 16px;
       gap: 6px;
     }
 
@@ -103,11 +146,11 @@
       align-items: center;
       padding: 8px 0;
       border-radius: 14px;
-      background: transparent;
+      background: var(--bg-secondary);
       border: none;
       color: var(--text-primary);
       cursor: pointer;
-      transition: transform 0.15s ease, background-color 0.2s ease;
+      transition: transform 0.15s ease;
     }
 
     .day-pill:active { transform: scale(0.94); }
@@ -115,72 +158,59 @@
       background: var(--accent);
       color: #FFFFFF;
     }
-    .day-pill .dow { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
-    .day-pill .dom { font-size: 16px; font-weight: 600; }
-
-    /* 主內容區 */
-    main {
-      padding: 16px 20px;
-      max-width: 500px;
-      margin: 0 auto;
+    .day-pill .dow { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
+    .day-pill .dom { font-size: 15px; font-weight: 600; }
+    .day-pill .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 3px;
+      opacity: 0;
     }
+    .day-pill.has-data .dot { opacity: 1; }
+    .day-pill.active .dot { background: #FFFFFF; }
 
-    /* 進度總覽卡片 */
-    .summary-card {
-      background: var(--bg-secondary);
-      border-radius: 18px;
-      padding: 16px 18px;
+    .section-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      margin-bottom: 22px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    }
-
-    .summary-text h2 {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 600;
-    }
-
-    .summary-text p {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .ring-wrap {
-      position: relative;
-      width: 52px;
-      height: 52px;
-    }
-
-    .ring-wrap svg { transform: rotate(-90deg); }
-    .ring-label {
-      position: absolute;
-      inset: 0;
-      display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
+      margin: 0 6px 8px;
     }
 
-    /* 區塊標題 */
     .section-title {
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
-      margin: 0 0 8px 6px;
-      letter-spacing: 0.3px;
     }
 
-    /* iOS Inset Grouped List */
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-badge {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .defer-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 0;
+      cursor: pointer;
+    }
+    .defer-btn:active { opacity: 0.6; }
+
     .ios-list {
       background: var(--bg-secondary);
       border-radius: 16px;
       overflow: hidden;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .task-item {
@@ -188,18 +218,15 @@
       align-items: center;
       padding: 14px 16px;
       border-bottom: 0.5px solid var(--separator);
-      transition: background-color 0.15s ease;
     }
-
     .task-item:last-child { border-bottom: none; }
-    .task-item:active { background-color: var(--bg-tertiary); }
 
     .check-btn {
-      width: 24px;
-      height: 24px;
+      width: 23px;
+      height: 23px;
       border-radius: 50%;
       border: 2px solid var(--text-secondary);
-      margin-right: 14px;
+      margin-right: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -214,8 +241,8 @@
     }
 
     .check-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       stroke: #fff;
       stroke-width: 3;
       fill: none;
@@ -224,64 +251,216 @@
       transition: all 0.2s ease;
     }
 
-    .task-item.done .check-btn svg {
-      opacity: 1;
-      transform: scale(1);
-    }
+    .task-item.done .check-btn svg { opacity: 1; transform: scale(1); }
 
-    .task-info {
-      flex: 1;
-      min-width: 0;
-    }
-
+    .task-info { flex: 1; min-width: 0; }
     .task-title {
       font-size: 16px;
       font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: opacity 0.2s;
+      line-height: 1.35;
+      word-break: break-word;
     }
-
     .task-item.done .task-title {
       text-decoration: line-through;
       color: var(--text-secondary);
     }
 
-    .task-meta {
-      font-size: 12px;
+    .task-note {
+      font-size: 13px;
       color: var(--text-secondary);
-      margin-top: 3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      margin-top: 2px;
     }
 
-    .tag-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      display: inline-block;
+    .focus-star {
+      color: var(--orange);
+      font-size: 13px;
+      margin-right: 6px;
     }
 
     .del-btn {
       background: none;
       border: none;
       color: var(--text-secondary);
-      font-size: 18px;
+      font-size: 16px;
       padding: 4px 6px;
       cursor: pointer;
-      opacity: 0.6;
+      opacity: 0.5;
     }
 
     .empty-state {
       text-align: center;
-      padding: 32px 16px;
+      padding: 26px 16px;
       color: var(--text-secondary);
       font-size: 14px;
     }
 
-    /* 底部懸浮新增按鈕（適配 Home 橫條） */
+    /* 每日格線日記 */
+    .grid-journal-card {
+      background-color: var(--bg-secondary);
+      background-image:
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 20px 20px;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .mood-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .mood-bar::-webkit-scrollbar { display: none; }
+
+    .mood-chip {
+      background: var(--bg-primary);
+      border: 1px solid transparent;
+      border-radius: 20px;
+      padding: 5px 11px;
+      font-size: 13px;
+      white-space: nowrap;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+    }
+
+    .mood-chip.active {
+      background: rgba(0, 122, 255, 0.14);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .mood-add {
+      color: var(--text-secondary);
+      font-weight: 600;
+      padding: 5px 10px;
+    }
+
+    .journal-textarea {
+      width: 100%;
+      min-height: 140px;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 20px;
+      resize: none;
+      outline: none;
+      user-select: text;
+    }
+
+    .journal-textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .journal-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    /* 週視圖卡片 */
+    .week-card {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .week-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .week-card-title { font-size: 15px; font-weight: 600; }
+    .week-card-count { font-size: 12px; color: var(--text-secondary); }
+    .week-preview { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* 月視圖日曆 */
+    .calendar-card {
+      background: var(--bg-secondary);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .cal-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .cal-nav button {
+      background: var(--bg-primary);
+      border: none;
+      color: var(--accent);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+    .cal-dow {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding-bottom: 6px;
+    }
+    .cal-cell {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--bg-primary);
+    }
+    .cal-cell.empty { background: transparent; cursor: default; }
+    .cal-cell.selected { background: var(--accent); color: #fff; font-weight: 700; }
+    .cal-dots {
+      display: flex;
+      gap: 3px;
+      margin-top: 3px;
+    }
+    .cal-dot-task { width: 4px; height: 4px; border-radius: 50%; background: var(--green); }
+    .cal-dot-note { width: 4px; height: 4px; border-radius: 50%; background: var(--purple); }
+    .cal-cell.selected .cal-dot-task,
+    .cal-cell.selected .cal-dot-note { background: #fff; }
+
+    /* 年視圖總覽 */
+    .year-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .month-box {
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      padding: 14px 12px;
+      cursor: pointer;
+    }
+    .month-box h3 { margin: 0 0 6px; font-size: 16px; }
+    .month-box p { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* 懸浮新增按鈕 */
     .fab {
       position: fixed;
       right: 22px;
@@ -293,18 +472,16 @@
       color: #fff;
       border: none;
       font-size: 28px;
-      font-weight: 400;
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
       cursor: pointer;
       z-index: 30;
-      transition: transform 0.15s ease;
     }
     .fab:active { transform: scale(0.92); }
 
-    /* iOS 原生 Bottom Sheet 彈窗 */
+    /* iOS Bottom Sheet */
     .sheet-backdrop {
       position: fixed;
       inset: 0;
@@ -353,7 +530,6 @@
       font-size: 16px;
       color: var(--accent);
       cursor: pointer;
-      padding: 4px 0;
     }
     .sheet-header button.save { font-weight: 600; }
 
@@ -376,20 +552,6 @@
       outline: none;
     }
 
-    .input-group label {
-      font-size: 15px;
-      color: var(--text-primary);
-      white-space: nowrap;
-      margin-right: 12px;
-    }
-
-    input[type="time"] {
-      width: auto !important;
-      font-size: 15px;
-      color: var(--accent);
-      font-weight: 500;
-    }
-
     .toggle-switch {
       width: 48px;
       height: 28px;
@@ -398,8 +560,9 @@
       position: relative;
       cursor: pointer;
       transition: background 0.2s;
+      flex-shrink: 0;
     }
-    .toggle-switch.on { background: var(--green); }
+    .toggle-switch.on { background: var(--orange); }
     .toggle-knob {
       width: 24px;
       height: 24px;
@@ -409,45 +572,51 @@
       top: 2px;
       left: 2px;
       transition: transform 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .toggle-switch.on .toggle-knob { transform: translateX(20px); }
+
+    /* 輕量提示 Toast */
+    .toast {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top));
+      left: 50%;
+      transform: translate(-50%, -80px);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+      z-index: 60;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    .toast.show { transform: translate(-50%, 0); }
   </style>
 </head>
 <body>
 
+  <div class="toast" id="toast"></div>
+
   <header>
     <div class="header-top">
       <div>
-        <div class="date-sub" id="fullDateLabel">2026年11月24日</div>
-        <h1>今日計畫</h1>
+        <div class="date-sub" id="subLabel">2026年11月24日</div>
+        <h1 id="mainTitle">今日計畫</h1>
       </div>
+      <button class="today-btn" id="todayBtn">回到今天</button>
     </div>
-    <div class="date-strip" id="dateStrip"></div>
+
+    <div class="segmented" id="viewSwitcher">
+      <button class="seg-btn active" data-view="day">日</button>
+      <button class="seg-btn" data-view="week">週</button>
+      <button class="seg-btn" data-view="month">月</button>
+      <button class="seg-btn" data-view="year">年</button>
+    </div>
   </header>
 
-  <main>
-    <div class="summary-card">
-      <div class="summary-text">
-        <h2 id="progressTitle">準備開始新的一天</h2>
-        <p id="progressSub">點擊右下角 + 新增今日任務</p>
-      </div>
-      <div class="ring-wrap">
-        <svg width="52" height="52">
-          <circle cx="26" cy="26" r="21" stroke="var(--bg-tertiary)" stroke-width="5" fill="none" />
-          <circle id="progressRing" cx="26" cy="26" r="21" stroke="var(--green)" stroke-width="5" fill="none"
-                  stroke-dasharray="131.95" stroke-dashoffset="131.95" stroke-linecap="round" />
-        </svg>
-        <div class="ring-label" id="progressPct">0%</div>
-      </div>
-    </div>
-
-    <div class="section-title">今日焦點</div>
-    <div class="ios-list" id="focusList"></div>
-
-    <div class="section-title">時間軸與待辦</div>
-    <div class="ios-list" id="scheduleList"></div>
-  </main>
+  <main id="appContent"></main>
 
   <button class="fab" id="openSheetBtn" aria-label="新增事項">＋</button>
 
@@ -456,146 +625,513 @@
     <div class="grabber"></div>
     <div class="sheet-header">
       <button id="cancelBtn">取消</button>
-      <strong style="font-size:16px;">新增計畫</strong>
+      <strong style="font-size:16px;" id="sheetTitle">新增任務</strong>
       <button class="save" id="saveBtn">加入</button>
     </div>
     <div class="input-group">
-      <input type="text" id="taskInput" placeholder="輸入待辦事項，例如：晨間閱讀 30 分鐘" />
+      <input type="text" id="taskInput" placeholder="想完成什麼事？（無時間限制）" />
     </div>
     <div class="input-group">
-      <label>時間</label>
-      <input type="time" id="timeInput" value="09:00" />
+      <input type="text" id="noteInput" placeholder="補充備註（選填）" />
     </div>
     <div class="input-group">
-      <label>設為「今日焦點」</label>
+      <span style="font-size:15px;">標記為重點事項 ★</span>
       <div class="toggle-switch" id="focusToggle"><div class="toggle-knob"></div></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'apple_minimal_planner_v1';
-    let selectedDate = new Date().toISOString().split('T')[0];
+    // 動態產生 Apple 質感極簡方格紙 App Icon (180x180)
+    (function generateAppleAppIcon() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 180;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+
+      // 純白極簡底色
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 180, 180);
+
+      // 細緻方格線
+      ctx.strokeStyle = 'rgba(0, 122, 255, 0.10)';
+      ctx.lineWidth = 1.5;
+      for (let i = 30; i < 180; i += 30) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 180); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(180, i); ctx.stroke();
+      }
+
+      // 頂部 iOS 強調色裝飾條
+      ctx.fillStyle = '#007AFF';
+      ctx.beginPath();
+      ctx.roundRect(42, 42, 96, 12, 6);
+      ctx.fill();
+
+      // 極簡打勾圓環
+      ctx.strokeStyle = '#34C759';
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(64, 106);
+      ctx.lineTo(82, 124);
+      ctx.lineTo(118, 84);
+      ctx.stroke();
+
+      const dataUrl = canvas.toDataURL('image/png');
+      document.getElementById('appIconLink').href = dataUrl;
+      document.getElementById('favIconLink').href = dataUrl;
+    })();
+
+    const STORAGE_KEY = 'apple_grid_planner_v3';
+    const DEFAULT_MOODS = ['☀️ 充實', '🌿 平靜', '⚡️ 專注', '☁️ 疲憊', '✨ 靈感'];
+    let currentView = 'day';
+    let selectedDate = toISO(new Date());
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
     let isFocus = false;
 
-    const loadData = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    const saveData = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    function toISO(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
 
-    function initDefaultData() {
-      const data = loadData();
-      if (!data[selectedDate]) {
-        data[selectedDate] = [
-          { id: 1, title: '檢視今日核心目標', time: '08:30', focus: true, done: false },
-          { id: 2, title: '專注工作時段（無干擾）', time: '10:00', focus: false, done: false },
-          { id: 3, title: '傍晚散步或伸展運動', time: '18:30', focus: false, done: false }
-        ];
-        saveData(data);
+    function parseISO(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    const loadStore = () => {
+      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      return {
+        days: raw.days || {},
+        goals: raw.goals || {},
+        moods: raw.moods || [...DEFAULT_MOODS]
+      };
+    };
+    const saveStore = (store) => localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+
+    function getDayRecord(store, iso) {
+      if (!store.days[iso]) {
+        store.days[iso] = { tasks: [], journal: '', mood: '' };
+      }
+      return store.days[iso];
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function initSample() {
+      const store = loadStore();
+      const today = toISO(new Date());
+      if (!store.days[today]) {
+        store.days[today] = {
+          tasks: [
+            { id: 1, title: '整理本週靈感筆記', note: '不限時段，有空再做', focus: true, done: false },
+            { id: 2, title: '閱讀 20 頁喜歡的書', note: '', focus: false, done: false }
+          ],
+          journal: '今天沒有被時間追著跑，感覺步調很舒服。\n寫下三件值得開心的事：\n1. ',
+          mood: '☀️ 充實'
+        };
+        saveStore(store);
       }
     }
 
-    function renderDateStrip() {
-      const strip = document.getElementById('dateStrip');
-      strip.innerHTML = '';
-      const base = new Date();
+    document.querySelectorAll('.seg-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        const d = parseISO(selectedDate);
+        calYear = d.getFullYear();
+        calMonth = d.getMonth();
+        render();
+      };
+    });
+
+    document.getElementById('todayBtn').onclick = () => {
+      const now = new Date();
+      selectedDate = toISO(now);
+      calYear = now.getFullYear();
+      calMonth = now.getMonth();
+      render();
+    };
+
+    function render() {
+      const d = parseISO(selectedDate);
+      const daysName = ['日', '一', '二', '三', '四', '五', '六'];
+      const sub = document.getElementById('subLabel');
+      const title = document.getElementById('mainTitle');
+      const fab = document.getElementById('openSheetBtn');
+
+      if (currentView === 'day') {
+        sub.textContent = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 週${daysName[d.getDay()]}`;
+        title.textContent = selectedDate === toISO(new Date()) ? '今日計畫' : `${d.getMonth() + 1}/${d.getDate()} 計畫`;
+        fab.style.display = 'flex';
+        renderDayView();
+      } else if (currentView === 'week') {
+        sub.textContent = `${d.getFullYear()}年 第 ${getWeekNumber(d)} 週`;
+        title.textContent = '本週總覽';
+        fab.style.display = 'flex';
+        renderWeekView();
+      } else if (currentView === 'month') {
+        sub.textContent = `${calYear}年`;
+        title.textContent = `${calMonth + 1}月月曆`;
+        fab.style.display = 'flex';
+        renderMonthView();
+      } else if (currentView === 'year') {
+        sub.textContent = '年度軌跡與目標';
+        title.textContent = `${calYear} 年`;
+        fab.style.display = 'none';
+        renderYearView();
+      }
+    }
+
+    // 1. 日視圖
+    function renderDayView() {
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      const base = parseISO(selectedDate);
       const days = ['日', '一', '二', '三', '四', '五', '六'];
 
-      for (let i = -2; i <= 4; i++) {
-        const d = new Date(base);
-        d.setDate(base.getDate() + i);
-        const iso = d.toISOString().split('T')[0];
-
-        const btn = document.createElement('button');
-        btn.className = 'day-pill' + (iso === selectedDate ? ' active' : '');
-        btn.innerHTML = `<span class="dow">週${days[d.getDay()]}</span><span class="dom">${d.getDate()}</span>`;
-        btn.onclick = () => {
-          selectedDate = iso;
-          updateHeaderDate(d);
-          renderDateStrip();
-          renderTasks();
-        };
-        strip.appendChild(btn);
+      let stripHTML = '<div class="date-strip">';
+      for (let i = -3; i <= 3; i++) {
+        const dt = new Date(base);
+        dt.setDate(base.getDate() + i);
+        const iso = toISO(dt);
+        const dayData = store.days[iso];
+        const hasData = dayData && (dayData.tasks.length > 0 || (dayData.journal && dayData.journal.trim().length > 0));
+        stripHTML += `
+          <button class="day-pill ${iso === selectedDate ? 'active' : ''} ${hasData ? 'has-data' : ''}" onclick="selectDay('${iso}')">
+            <span class="dow">${days[dt.getDay()]}</span>
+            <span class="dom">${dt.getDate()}</span>
+            <span class="dot"></span>
+          </button>
+        `;
       }
-    }
+      stripHTML += '</div>';
 
-    function updateHeaderDate(d) {
-      document.getElementById('fullDateLabel').textContent =
-        `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
-    }
+      const sorted = [...rec.tasks].sort((a, b) => (a.done - b.done) || (b.focus - a.focus));
+      const doneCount = rec.tasks.filter(t => t.done).length;
+      const undoneCount = rec.tasks.length - doneCount;
 
-    function renderTasks() {
-      const data = loadData();
-      const tasks = (data[selectedDate] || []).sort((a, b) => a.time.localeCompare(b.time));
-      const focusList = document.getElementById('focusList');
-      const scheduleList = document.getElementById('scheduleList');
-
-      const focusTasks = tasks.filter(t => t.focus);
-      const normalTasks = tasks.filter(t => !t.focus);
-
-      focusList.innerHTML = focusTasks.length
-        ? focusTasks.map(taskHTML).join('')
-        : '<div class="empty-state">尚未設定今日焦點</div>';
-
-      scheduleList.innerHTML = normalTasks.length
-        ? normalTasks.map(taskHTML).join('')
-        : '<div class="empty-state">目前沒有排程事項</div>';
-
-      updateProgress(tasks);
-    }
-
-    function taskHTML(t) {
-      const color = t.focus ? 'var(--orange)' : 'var(--accent)';
-      return `
-        <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
-          <div class="check-btn">
+      const tasksHTML = sorted.length ? sorted.map(t => `
+        <div class="task-item ${t.done ? 'done' : ''}">
+          <div class="check-btn" onclick="toggleTask(${t.id})">
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
-          <div class="task-info">
-            <div class="task-title">${escapeHTML(t.title)}</div>
-            <div class="task-meta">
-              <span class="tag-dot" style="background:${color}"></span>
-              <span>${t.time}</span>
+          <div class="task-info" onclick="toggleTask(${t.id})">
+            <div class="task-title">${t.focus ? '<span class="focus-star">★</span>' : ''}${escapeHTML(t.title)}</div>
+            ${t.note ? `<div class="task-note">${escapeHTML(t.note)}</div>` : ''}
+          </div>
+          <button class="del-btn" onclick="deleteTask(${t.id})">✕</button>
+        </div>
+      `).join('') : '<div class="empty-state">今天沒有待辦事項，點擊右下角 ＋ 自由新增</div>';
+
+      const moodHTML = store.moods.map((m, idx) => `
+        <button class="mood-chip ${rec.mood === m ? 'active' : ''}"
+                onclick="setMood('${escapeAttr(m)}')"
+                ondblclick="removeCustomMood(${idx})">${escapeHTML(m)}</button>
+      `).join('') + `<button class="mood-chip mood-add" onclick="addCustomMood()">＋</button>`;
+
+      document.getElementById('appContent').innerHTML = `
+        ${stripHTML}
+        <div class="section-header">
+          <span class="section-title">待辦清單</span>
+          <div class="section-actions">
+            ${undoneCount > 0 ? `<button class="defer-btn" onclick="deferTasksToTomorrow()">順延至明天 ↷</button>` : ''}
+            <span class="section-badge">${doneCount} / ${rec.tasks.length}</span>
+          </div>
+        </div>
+        <div class="ios-list">${tasksHTML}</div>
+
+        <div class="section-header">
+          <span class="section-title">每日格線日記</span>
+          <span class="section-badge" id="saveStatus">自動儲存</span>
+        </div>
+        <div class="grid-journal-card">
+          <div class="mood-bar">${moodHTML}</div>
+          <textarea class="journal-textarea" id="journalBox" placeholder="在方格紙上隨手寫下今天的想法、心情或三件小事...">${escapeHTML(rec.journal || '')}</textarea>
+          <div class="journal-footer">
+            <span>Grid Journal</span>
+            <span id="charCount">${(rec.journal || '').length} 字</span>
+          </div>
+        </div>
+      `;
+
+      const box = document.getElementById('journalBox');
+      box.addEventListener('input', () => {
+        const s = loadStore();
+        const r = getDayRecord(s, selectedDate);
+        r.journal = box.value;
+        saveStore(s);
+        document.getElementById('charCount').textContent = `${box.value.length} 字`;
+        document.getElementById('saveStatus').textContent = '已儲存 ✓';
+      });
+    }
+
+    // 2. 週視圖
+    function renderWeekView() {
+      const store = loadStore();
+      const base = parseISO(selectedDate);
+      const dayOfWeek = base.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(base);
+      monday.setDate(base.getDate() + mondayOffset);
+
+      const daysName = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+      let html = '';
+
+      for (let i = 0; i < 7; i++) {
+        const dt = new Date(monday);
+        dt.setDate(monday.getDate() + i);
+        const iso = toISO(dt);
+        const rec = store.days[iso] || { tasks: [], journal: '', mood: '' };
+        const done = rec.tasks.filter(t => t.done).length;
+        const previewTasks = rec.tasks.slice(0, 2).map(t => `${t.done ? '✓' : '○'} ${t.title}`).join(' ');
+        const snippet = rec.journal ? rec.journal.trim().split('\n')[0].slice(0, 28) : '';
+
+        html += `
+          <div class="week-card" onclick="jumpToDay('${iso}')">
+            <div class="week-card-head">
+              <span class="week-card-title">${daysName[i]} · ${dt.getMonth() + 1}/${dt.getDate()} ${rec.mood || ''}</span>
+              <span class="week-card-count">${rec.tasks.length ? `${done}/${rec.tasks.length} 項` : '無任務'}</span>
+            </div>
+            <div class="week-preview">
+              ${previewTasks ? `<div>${escapeHTML(previewTasks)}</div>` : ''}
+              ${snippet ? `<div style="color:var(--purple);margin-top:3px;">✎ ${escapeHTML(snippet)}...</div>` : ''}
+              ${!previewTasks && !snippet ? '點擊規劃這一天或寫日記' : ''}
             </div>
           </div>
-          <button class="del-btn" onclick="deleteTask(event, ${t.id})">✕</button>
+        `;
+      }
+      document.getElementById('appContent').innerHTML = html;
+    }
+
+    // 3. 月視圖
+    function renderMonthView() {
+      const store = loadStore();
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const dows = ['日', '一', '二', '三', '四', '五', '六'];
+
+      let cells = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+      for (let i = 0; i < firstDay; i++) {
+        cells += `<div class="cal-cell empty"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const rec = store.days[iso];
+        const hasTask = rec && rec.tasks && rec.tasks.length > 0;
+        const hasJournal = rec && rec.journal && rec.journal.trim().length > 0;
+
+        cells += `
+          <div class="cal-cell ${iso === selectedDate ? 'selected' : ''}" onclick="selectMonthDay('${iso}')">
+            <span>${day}</span>
+            <div class="cal-dots">
+              ${hasTask ? '<span class="cal-dot-task"></span>' : ''}
+              ${hasJournal ? '<span class="cal-dot-note"></span>' : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      const selRec = store.days[selectedDate] || { tasks: [], journal: '', mood: '' };
+      const selDateObj = parseISO(selectedDate);
+
+      document.getElementById('appContent').innerHTML = `
+        <div class="calendar-card">
+          <div class="cal-nav">
+            <button onclick="changeMonth(-1)">‹</button>
+            <strong>${calYear}年 ${calMonth + 1}月</strong>
+            <button onclick="changeMonth(1)">›</button>
+          </div>
+          <div class="cal-grid">${cells}</div>
+          <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:11px;color:var(--text-secondary);">
+            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;"></i>有計畫</span>
+            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--purple);margin-right:4px;"></i>有日記</span>
+          </div>
+        </div>
+
+        <div class="week-card" onclick="jumpToDay('${selectedDate}')">
+          <div class="week-card-head">
+            <span class="week-card-title">${selDateObj.getMonth() + 1}月${selDateObj.getDate()}日 摘要 ${selRec.mood || ''}</span>
+            <span style="color:var(--accent);font-size:13px;font-weight:600;">打開當日 ›</span>
+          </div>
+          <div class="week-preview">
+            <div>任務：${selRec.tasks.length} 項（已完成 ${selRec.tasks.filter(t => t.done).length} 項）</div>
+            <div style="margin-top:4px;">日記：${selRec.journal ? escapeHTML(selRec.journal.slice(0, 50)) : '尚未撰寫'}</div>
+          </div>
         </div>
       `;
     }
 
-    function updateProgress(tasks) {
-      const total = tasks.length;
-      const done = tasks.filter(t => t.done).length;
-      const pct = total ? Math.round((done / total) * 100) : 0;
-      const circumference = 131.95;
-      const offset = circumference - (pct / 100) * circumference;
+    // 4. 年視圖
+    function renderYearView() {
+      const store = loadStore();
+      let gridHTML = '<div class="year-grid">';
 
-      document.getElementById('progressRing').style.strokeDashoffset = offset;
-      document.getElementById('progressPct').textContent = `${pct}%`;
-      document.getElementById('progressTitle').textContent =
-        total === 0 ? '今日尚無計畫' : (pct === 100 ? '今日任務全數完成！' : `已完成 ${done} / ${total} 項`);
-      document.getElementById('progressSub').textContent =
-        total === 0 ? '點擊右下角 + 開始規劃' : `還有 ${total - done} 項待完成`;
+      for (let m = 0; m < 12; m++) {
+        const prefix = `${calYear}-${String(m + 1).padStart(2, '0')}`;
+        let taskCount = 0;
+        let journalDays = 0;
+
+        Object.keys(store.days).forEach(k => {
+          if (k.startsWith(prefix)) {
+            taskCount += (store.days[k].tasks || []).length;
+            if (store.days[k].journal && store.days[k].journal.trim()) journalDays++;
+          }
+        });
+
+        gridHTML += `
+          <div class="month-box" onclick="jumpToMonth(${m})">
+            <h3>${m + 1} 月</h3>
+            <p>${taskCount} 項計畫<br>${journalDays} 篇日記</p>
+          </div>
+        `;
+      }
+      gridHTML += '</div>';
+
+      const yearGoal = (store.goals && store.goals[calYear]) || '';
+
+      document.getElementById('appContent').innerHTML = `
+        <div class="cal-nav" style="background:var(--bg-secondary);padding:10px 14px;border-radius:14px;margin-bottom:14px;">
+          <button onclick="changeYear(-1)">‹</button>
+          <strong>${calYear} 年度總覽</strong>
+          <button onclick="changeYear(1)">›</button>
+        </div>
+        ${gridHTML}
+        <div class="section-header">
+          <span class="section-title">${calYear} 年度關鍵字與願景</span>
+        </div>
+        <div class="grid-journal-card">
+          <textarea class="journal-textarea" style="min-height:100px;" id="yearGoalBox" placeholder="寫下今年想達成的目標、想去的地方或年度關鍵字...">${escapeHTML(yearGoal)}</textarea>
+        </div>
+      `;
+
+      const yBox = document.getElementById('yearGoalBox');
+      yBox.addEventListener('input', () => {
+        const s = loadStore();
+        if (!s.goals) s.goals = {};
+        s.goals[calYear] = yBox.value;
+        saveStore(s);
+      });
     }
 
+    // 互動與順延功能
+    window.deferTasksToTomorrow = () => {
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      const undone = rec.tasks.filter(t => !t.done);
+      if (!undone.length) return;
+
+      const nextDate = parseISO(selectedDate);
+      nextDate.setDate(nextDate.getDate() + 1);
+      const nextISO = toISO(nextDate);
+      const nextRec = getDayRecord(store, nextISO);
+
+      rec.tasks = rec.tasks.filter(t => t.done);
+      undone.forEach((t, i) => {
+        nextRec.tasks.push({ ...t, id: Date.now() + i });
+      });
+
+      saveStore(store);
+      render();
+      showToast(`已將 ${undone.length} 項未完成任務順延至明天`);
+    };
+
+    window.addCustomMood = () => {
+      const text = prompt('輸入新的心情標籤（例如：☕️ 放空）：');
+      if (!text || !text.trim()) return;
+      const store = loadStore();
+      const label = text.trim().slice(0, 12);
+      if (!store.moods.includes(label)) {
+        store.moods.push(label);
+      }
+      const rec = getDayRecord(store, selectedDate);
+      rec.mood = label;
+      saveStore(store);
+      renderDayView();
+    };
+
+    window.removeCustomMood = (idx) => {
+      const store = loadStore();
+      if (store.moods.length <= 1) return;
+      const removed = store.moods[idx];
+      if (confirm(`要移除「${removed}」這個標籤嗎？`)) {
+        store.moods.splice(idx, 1);
+        saveStore(store);
+        renderDayView();
+      }
+    };
+
+    window.selectDay = (iso) => { selectedDate = iso; render(); };
+    window.selectMonthDay = (iso) => { selectedDate = iso; renderMonthView(); };
+    window.jumpToDay = (iso) => {
+      selectedDate = iso;
+      currentView = 'day';
+      document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.view === 'day'));
+      render();
+    };
+    window.jumpToMonth = (m) => {
+      calMonth = m;
+      currentView = 'month';
+      document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.view === 'month'));
+      render();
+    };
+    window.changeMonth = (delta) => {
+      calMonth += delta;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderMonthView();
+    };
+    window.changeYear = (delta) => { calYear += delta; renderYearView(); };
+
     window.toggleTask = (id) => {
-      const data = loadData();
-      const task = (data[selectedDate] || []).find(t => t.id === id);
-      if (task) task.done = !task.done;
-      saveData(data);
-      renderTasks();
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      const t = rec.tasks.find(x => x.id === id);
+      if (t) t.done = !t.done;
+      saveStore(store);
+      render();
     };
 
-    window.deleteTask = (e, id) => {
-      e.stopPropagation();
-      const data = loadData();
-      data[selectedDate] = (data[selectedDate] || []).filter(t => t.id !== id);
-      saveData(data);
-      renderTasks();
+    window.deleteTask = (id) => {
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      rec.tasks = rec.tasks.filter(x => x.id !== id);
+      saveStore(store);
+      render();
     };
 
-    const escapeHTML = (str) => str.replace(/[&<>'"]/g, tag => ({
+    window.setMood = (m) => {
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      rec.mood = rec.mood === m ? '' : m;
+      saveStore(store);
+      renderDayView();
+    };
+
+    function getWeekNumber(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() || 7;
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    const escapeHTML = (str) => String(str).replace(/[&<>'"]/g, tag => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[tag]));
+    const escapeAttr = (str) => String(str).replace(/'/g, "\\'");
 
-    // Sheet 控制
+    // Bottom Sheet
     const sheet = document.getElementById('sheet');
     const backdrop = document.getElementById('backdrop');
     const toggle = document.getElementById('focusToggle');
@@ -607,6 +1143,8 @@
     };
 
     document.getElementById('openSheetBtn').onclick = () => {
+      const d = parseISO(selectedDate);
+      document.getElementById('sheetTitle').textContent = `新增至 ${d.getMonth() + 1}/${d.getDate()}`;
       sheet.classList.add('open');
       backdrop.classList.add('open');
       setTimeout(() => document.getElementById('taskInput').focus(), 200);
@@ -614,39 +1152,28 @@
 
     document.getElementById('cancelBtn').onclick = closeSheet;
     backdrop.onclick = closeSheet;
-
-    toggle.onclick = () => {
-      isFocus = !isFocus;
-      toggle.classList.toggle('on', isFocus);
-    };
+    toggle.onclick = () => { isFocus = !isFocus; toggle.classList.toggle('on', isFocus); };
 
     document.getElementById('saveBtn').onclick = () => {
       const title = document.getElementById('taskInput').value.trim();
-      const time = document.getElementById('timeInput').value || '09:00';
+      const note = document.getElementById('noteInput').value.trim();
       if (!title) return;
 
-      const data = loadData();
-      if (!data[selectedDate]) data[selectedDate] = [];
-      data[selectedDate].push({
-        id: Date.now(),
-        title,
-        time,
-        focus: isFocus,
-        done: false
-      });
-      saveData(data);
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      rec.tasks.push({ id: Date.now(), title, note, focus: isFocus, done: false });
+      saveStore(store);
 
       document.getElementById('taskInput').value = '';
+      document.getElementById('noteInput').value = '';
       isFocus = false;
       toggle.classList.remove('on');
       closeSheet();
-      renderTasks();
+      render();
     };
 
-    initDefaultData();
-    updateHeaderDate(new Date());
-    renderDateStrip();
-    renderTasks();
+    initSample();
+    render();
   </script>
 </body>
 </html>
