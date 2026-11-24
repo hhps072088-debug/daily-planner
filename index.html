@@ -1,98 +1,880 @@
-/* 黑白極簡主題 */
-:root {
-  color-scheme: light;
-  --bg-base: #f5f5f5;
-  --glass-card: rgba(255, 255, 255, .74);
-  --glass-heavy: rgba(255, 255, 255, .88);
-  --glass-border: rgba(255, 255, 255, .88);
-  --text-primary: #111;
-  --text-secondary: rgba(0, 0, 0, .52);
-  --accent: #111;
-  --separator: rgba(0, 0, 0, .10);
-}
+```html
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+    .cal-dow {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding-bottom: 6px;
+    }
+    .cal-cell {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--pill-bg);
+    }
+    .cal-cell.empty { background: transparent; cursor: default; }
+    .cal-cell.selected { background: var(--accent); color: #fff; }
+    .cal-cell.today:not(.selected) { border: 1px solid var(--accent); }
+    .cal-dots {
+      display: flex;
+      gap: 3px;
+      margin-top: 3px;
+      height: 5px;
+    }
+    .cal-dot-task, .cal-dot-note {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .cal-dot-note { background: var(--purple); }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --bg-base: #080808;
-    --glass-card: rgba(28, 28, 28, .78);
-    --glass-heavy: rgba(32, 32, 32, .90);
-    --glass-border: rgba(255, 255, 255, .12);
-    --text-primary: #f7f7f7;
-    --text-secondary: rgba(255, 255, 255, .56);
-    --accent: #f5f5f5;
-    --separator: rgba(255, 255, 255, .13);
-  }
-}
+    .year-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .month-box {
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .month-box h3 { margin: 0 0 5px; font-size: 16px; }
+    .month-box p { margin: 0; font-size: 11px; color: var(--text-secondary); }
 
-/* 毛玻璃控制中心：固定左下角 */
-.cc-anchor {
-  position: fixed;
-  left: max(18px, env(safe-area-inset-left));
-  bottom: calc(18px + env(safe-area-inset-bottom));
-  z-index: 45;
-}
+    /* 左下角控制中心 */
+    .cc-anchor {
+      position: fixed;
+      left: max(18px, env(safe-area-inset-left));
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      z-index: 40;
+    }
 
-.cc-popover {
-  width: min(286px, calc(100vw - 36px));
-  padding: 13px;
-  border-radius: 26px;
-  background: var(--glass-heavy);
-  backdrop-filter: blur(38px) saturate(120%);
-  -webkit-backdrop-filter: blur(38px) saturate(120%);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 18px 48px rgba(0,0,0,.14);
-}
+    .cc-trigger {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-heavy);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+      border-radius: 22px;
+      padding: 11px 15px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: transform .2s ease;
+    }
+    .cc-trigger:active { transform: scale(.96); }
 
-/* 選項全部直向排列 */
-.cc-grid-views {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
+    .cc-icon {
+      width: 19px;
+      height: 19px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3px;
+    }
+    .cc-icon span {
+      border-radius: 3px;
+      background: var(--text-primary);
+      opacity: .78;
+    }
 
-.cc-tile {
-  width: 100%;
-  min-height: 43px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 13px;
-  background: transparent;
-  color: var(--text-primary);
-  text-align: left;
-}
+    .cc-popover {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      width: 270px;
+      padding: 14px;
+      border-radius: 25px;
+      background: var(--glass-heavy);
+      backdrop-filter: blur(34px) saturate(190%);
+      -webkit-backdrop-filter: blur(34px) saturate(190%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 18px 48px rgba(0,0,0,.18);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px) scale(.97);
+      transform-origin: bottom left;
+      transition: opacity .2s ease, transform .2s ease, visibility .2s;
+    }
+    .cc-popover.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
 
-.cc-tile.active {
-  color: #fff;
-  background: #111;
-}
+    .cc-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 700;
+      letter-spacing: .4px;
+      margin: 1px 4px 10px;
+    }
+    .cc-grid-views {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .cc-tile {
+      border: 1px solid var(--separator);
+      border-radius: 15px;
+      padding: 12px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(128,128,128,.08);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s ease;
+      text-align: left;
+    }
+    .cc-tile.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .cc-row-actions {
+      border-top: 1px solid var(--separator);
+      padding-top: 9px;
+      display: flex;
+      gap: 8px;
+    }
+    .cc-action-btn {
+      flex: 1;
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 8px;
+      background: rgba(128,128,128,.10);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-@media (prefers-color-scheme: dark) {
-  .cc-tile.active {
-    color: #080808;
-    background: #f5f5f5;
-  }
-}
+    /* 新增任務按鈕 */
+    .fab {
+      position: fixed;
+      right: max(20px, env(safe-area-inset-right));
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-heavy);
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      box-shadow: 0 8px 25px rgba(0,0,0,.14);
+      color: var(--text-primary);
+      font-size: 30px;
+      font-weight: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 40;
+      transition: transform .2s ease;
+    }
+    .fab:active { transform: scale(.92); }
 
-/* 控制中心其他功能也直向排列 */
-.cc-row-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--separator);
-}
+    /* Bottom sheet */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.25);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      opacity: 0;
+      visibility: hidden;
+      z-index: 48;
+      transition: opacity .2s ease, visibility .2s;
+    }
+    .backdrop.open { opacity: 1; visibility: visible; }
 
-.cc-action-btn {
-  width: 100%;
-  min-height: 42px;
-  justify-content: flex-start;
-  padding: 10px 12px;
-  background: transparent;
-  color: var(--text-primary);
-  border-radius: 13px;
-}
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
+      border-radius: 26px 26px 0 0;
+      background: var(--glass-heavy);
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 -12px 40px rgba(0,0,0,.14);
+      transform: translateY(110%);
+      transition: transform .28s cubic-bezier(.2,.8,.2,1);
+    }
+    .sheet.open { transform: translateY(0); }
+    .grabber {
+      width: 38px;
+      height: 5px;
+      border-radius: 5px;
+      background: var(--text-secondary);
+      opacity: .3;
+      margin: 2px auto 16px;
+    }
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .sheet-header button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      padding: 6px 0;
+      cursor: pointer;
+    }
+    .sheet-header button.save {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--separator);
+    }
+    .input-group input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 16px;
+      user-select: text;
+    }
+    .input-group input::placeholder { color: var(--text-secondary); }
+
+    .toggle-switch {
+      width: 48px;
+      height: 28px;
+      border-radius: 20px;
+      background: rgba(120,120,128,.25);
+      position: relative;
+      cursor: pointer;
+      transition: background .2s ease;
+      flex-shrink: 0;
+    }
+    .toggle-switch.on { background: var(--accent); }
+    .toggle-switch.on.orange { background: var(--orange); }
+    .toggle-switch.on.blue { background: var(--accent); }
+    .toggle-knob {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform .2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch.on .toggle-knob { transform: translateX(20px); }
+
+    .toast {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top));
+      left: 50%;
+      transform: translate(-50%, -80px);
+      background: var(--glass-heavy);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 0.5px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+      z-index: 60;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+    .toast.show { transform: translate(-50%, 0); }
+            taskPlaceholder: 'What would you like to do? (No time required)',
+        notePlaceholder: 'Note (optional)',
+        dailyToggle: 'Repeat Every Day ↻',
+        focusToggle: 'Mark as Priority ★',
+        noTask: 'No tasks',
+        items: (d, t) => `${d}/${t} done`,
+        clickPlan: 'Tap to plan this day or write a note',
+        hasPlan: 'Tasks',
+        hasJournal: 'Journal',
+        summaryPrefix: 'Summary',
+        openDay: 'Open Day ›',
+        tasksSummary: (d, t) => `Tasks: ${d}/${t} completed`,
+        journalSummary: (txt) => `Journal: ${txt || 'Not written yet'}`,
+        monthStats: (t, j) => `${t} plans<br>${j} journal entries`,
+        yearGoalTitle: 'Year Vision & Keywords',
+        yearGoalPlaceholder: 'Write your goals or keywords for this year...',
+        addMoodPrompt: 'Add a new mood tag (e.g. ☕️ Slow day):',
+        delMoodConfirm: (m) => `Remove the mood tag "${m}"?`,
+        dows: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        weekDows: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        defaultMoods: ['☀️ Productive', '🌿 Calm', '⚡️ Focused', '☁️ Tired', '✨ Inspired'],
+        formatDate: (y, m, d, dow) => `${dow}, ${m}/${d}/${y}`,
+        formatShortDate: (m, d) => `${m}/${d}`
+      }
+    };
+
+    let lang = localStorage.getItem('planner_lang') || 'zh-TW';
+    let selectedDate = toISO(new Date());
+    let currentView = 'day';
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    let isFocus = false;
+    let isDaily = false;
+    let ccOpen = false;
+
+    const STORE_KEY = 'apple_ios_planner_v4';
+
+    function t() { return I18N[lang] || I18N['zh-TW']; }
+    function toISO(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+    function parseISO(s) {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function loadStore() {
+      const fallback = { days: {}, dailyHabits: [], goals: {}, moods: t().defaultMoods.slice() };
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return fallback;
+        if (!parsed.days || typeof parsed.days !== 'object' || Array.isArray(parsed.days)) parsed.days = {};
+        if (!Array.isArray(parsed.dailyHabits)) parsed.dailyHabits = [];
+        if (!parsed.goals || typeof parsed.goals !== 'object' || Array.isArray(parsed.goals)) parsed.goals = {};
+        if (!Array.isArray(parsed.moods) || !parsed.moods.length) parsed.moods = t().defaultMoods.slice();
+        return parsed;
+      } catch (error) {
+        console.warn('Planner data could not be read; using a clean store.', error);
+        return fallback;
+      }
+    }
+
+    function saveStore(store) {
+      localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    }
+
+    function getDayRecord(store, date) {
+      if (!store.days[date]) {
+        store.days[date] = { tasks: [], journal: '', mood: '', doneHabits: [] };
+      }
+      const r = store.days[date];
+      if (!Array.isArray(r.tasks)) r.tasks = [];
+      if (!Array.isArray(r.doneHabits)) r.doneHabits = [];
+      return r;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function applyStaticI18n() {
+      const loc = t();
+      document.getElementById('ccViewLabel').textContent = loc.ccViewsTitle;
+      document.querySelectorAll('[data-label]').forEach(el => {
+        el.textContent = loc.views[el.dataset.label];
+      });
+      document.getElementById('todayLabel').textContent = loc.today;
+      document.getElementById('langLabel').textContent = loc.langSwitch;
+      document.getElementById('cancelBtn').textContent = loc.cancel;
+      document.getElementById('saveBtn').textContent = loc.add;
+      document.getElementById('taskInput').placeholder = loc.taskPlaceholder;
+      document.getElementById('noteInput').placeholder = loc.notePlaceholder;
+      document.getElementById('dailyLabel').textContent = loc.dailyToggle;
+      document.getElementById('focusLabel').textContent = loc.focusToggle;
+    }
+
+    function getCombinedTasks(store, date) {
+      const rec = store.days[date] || { tasks: [], doneHabits: [] };
+      const habits = store.dailyHabits || [];
+      const doneHabits = rec.doneHabits || [];
+      const dailyItems = habits.map(h => ({
+        ...h,
+        daily: true,
+        done: doneHabits.includes(h.id)
+      }));
+      const normalItems = (rec.tasks || []).map(x => ({ ...x, daily: false }));
+      return [...dailyItems, ...normalItems];
+    }
+
+    function setCC(open) {
+      ccOpen = open;
+      document.getElementById('ccPopover').classList.toggle('open', open);
+      if (!open && !document.getElementById('sheet').classList.contains('open')) {
+        document.getElementById('backdrop').classList.remove('open');
+      }
+      if (open) document.getElementById('backdrop').classList.add('open');
+    }
+
+    function render() {
+      const loc = t();
+      const date = parseISO(selectedDate);
+      const dow = date.getDay();
+      document.getElementById('subLabel').textContent =
+        loc.formatDate(date.getFullYear(), date.getMonth() + 1, date.getDate(), loc.dows[dow]);
+
+      const title = currentView === 'day'
+        ? loc.todayPlan
+        : currentView === 'week'
+          ? `${loc.weekPrefix}${getWeekNumber(date)}${loc.weekSuffix}`
+          : currentView === 'month'
+            ? `${date.getFullYear()}${loc.yearTitle} ${date.getMonth() + 1}${loc.monthSuffix}`
+            : `${calYear}${loc.yearTitle}`;
+
+      document.getElementById('mainTitle').textContent = title;
+      document.getElementById('ccCurrentBadge').textContent = loc.views[currentView] || loc.views.day;
+
+      if (currentView === 'day') renderDayView();
+      else if (currentView === 'week') renderWeekView();
+      else if (currentView === 'month') renderMonthView();
+      else renderYearView();
+
+      document.querySelectorAll('.cc-tile').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === currentView);
+      });
+    }
+
+    function renderDayView() {
+      const loc = t();
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      const combined = getCombinedTasks(store, selectedDate);
+      const doneCount = combined.filter(x => x.done).length;
+      const undoneCount = combined.length - doneCount;
+
+      const tasksHTML = combined.length ? combined.map(item => `
+        <div class="task-item ${item.done ? 'done' : ''}">
+          <div class="check-btn" onclick="toggleTask(${item.id}, ${item.daily})">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div class="task-info" onclick="toggleTask(${item.id}, ${item.daily})">
+            <div class="task-title">${item.focus ? '<span class="focus-star">★</span>' : ''}${escapeHTML(item.title)}</div>
+            <div class="task-meta-row">
+              ${item.daily ? `<span class="daily-tag">↻ ${loc.dailyBadge}</span>` : ''}
+              ${item.note ? `<span class="task-note">${escapeHTML(item.note)}</span>` : ''}
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteTask(${item.id}, ${item.daily})">✕</button>
+        </div>
+      `).join('') : `<div class="empty-state">${loc.emptyTasks}</div>`;
+
+      const moodHTML = store.moods.map((m, idx) => `
+        <button class="mood-chip ${rec.mood === m ? 'active' : ''}"
+                onclick="setMood('${escapeAttr(m)}')"
+                ondblclick="removeCustomMood(${idx})">${escapeHTML(m)}</button>
+      `).join('') + `<button class="mood-chip mood-add" onclick="addCustomMood()">＋</button>`;
+
+      document.getElementById('appContent').innerHTML = `
+        <div class="section-header">
+          <span class="section-title">${loc.todoTitle}</span>
+          <div class="section-actions">
+            ${undoneCount > 0 ? `<button class="defer-btn" onclick="deferTasksToTomorrow()">${loc.deferBtn}</button>` : ''}
+            <span class="section-badge">${doneCount}/${combined.length}</span>
+          </div>
+        </div>
+        <div class="ios-list glass-surface">${tasksHTML}</div>
+
+        <div class="section-header">
+          <span class="section-title">${loc.journalTitle}</span>
+          <span class="section-badge" id="saveStatus">${loc.autoSaved}</span>
+        </div>
+        <div class="journal-card glass-surface">
+          <div class="mood-bar">${moodHTML}</div>
+          <textarea class="journal-textarea" id="journalBox" placeholder="${loc.journalPlaceholder}">${escapeHTML(rec.journal || '')}</textarea>
+          <div class="journal-footer">
+            <span>${loc.journalTitle}</span>
+            <span id="charCount">${loc.chars((rec.journal || '').length)}</span>
+          </div>
+        </div>
+      `;
+
+      const box = document.getElementById('journalBox');
+      box.addEventListener('input', () => {
+        const s = loadStore();
+        const r = getDayRecord(s, selectedDate);
+        r.journal = box.value;
+        saveStore(s);
+        document.getElementById('charCount').textContent = t().chars(box.value.length);
+        document.getElementById('saveStatus').textContent = t().savedToast;
+      });
+    }
+
+    function renderWeekView() {
+      const loc = t();
+      const store = loadStore();
+      const base = parseISO(selectedDate);
+      const dayOfWeek = base.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(base);
+      monday.setDate(base.getDate() + mondayOffset);
+
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        const dt = new Date(monday);
+        dt.setDate(monday.getDate() + i);
+        const iso = toISO(dt);
+        const rec = store.days[iso] || { journal: '', mood: '' };
+        const items = getCombinedTasks(store, iso);
+        const done = items.filter(x => x.done).length;
+        const previewTasks = items.slice(0, 2).map(x => `${x.done ? '✓' : '○'} ${x.title}`).join(' ');
+        const snippet = rec.journal ? rec.journal.trim().split('\n')[0].slice(0, 28) : '';
+
+        html += `
+          <div class="week-card glass-surface" onclick="jumpToDay('${iso}')">
+            <div class="week-card-head">
+              <span class="week-card-title">${loc.weekDows[i]} · ${loc.formatShortDate(dt.getMonth() + 1, dt.getDate())} ${rec.mood || ''}</span>
+              <span class="week-card-count">${items.length ? loc.items(done, items.length) : loc.noTask}</span>
+            </div>
+            <div class="week-preview">
+              ${previewTasks ? `<div>${escapeHTML(previewTasks)}</div>` : ''}
+              ${snippet ? `<div style="color:var(--purple);margin-top:3px;">✎ ${escapeHTML(snippet)}...</div>` : ''}
+              ${!previewTasks && !snippet ? loc.clickPlan : ''}
+            </div>
+          </div>
+        `;
+      }
+      document.getElementById('appContent').innerHTML = html;
+    }
+
+    function renderMonthView() {
+      const loc = t();
+      const store = loadStore();
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+      let cells = loc.dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+      for (let i = 0; i < firstDay; i++) cells += `<div class="cal-cell empty"></div>`;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const iso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const rec = store.days[iso];
+        const hasTask = getCombinedTasks(store, iso).length > 0;
+        const hasJournal = rec && rec.journal && rec.journal.trim().length > 0;
+
+        cells += `
+          <div class="cal-cell ${iso === selectedDate ? 'selected' : ''}" onclick="selectMonthDay('${iso}')">
+            <span>${day}</span>
+            <div class="cal-dots">
+              ${hasTask ? '<span class="cal-dot-task"></span>' : ''}
+              ${hasJournal ? '<span class="cal-dot-note"></span>' : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      const selRec = store.days[selectedDate] || { journal: '', mood: '' };
+      const selItems = getCombinedTasks(store, selectedDate);
+      const selDone = selItems.filter(x => x.done).length;
+      const selDateObj = parseISO(selectedDate);
+
+      document.getElementById('appContent').innerHTML = `
+        <div class="calendar-card glass-surface">
+          <div class="cal-nav">
+            <button onclick="changeMonth(-1)">‹</button>
+            <strong>${calYear} / ${calMonth + 1}</strong>
+            <button onclick="changeMonth(1)">›</button>
+          </div>
+          <div class="cal-grid">${cells}</div>
+          <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:11px;color:var(--text-secondary);">
+            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;"></i>${loc.hasPlan}</span>
+            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--purple);margin-right:4px;"></i>${loc.hasJournal}</span>
+          </div>
+        </div>
+
+        <div class="week-card glass-surface" onclick="jumpToDay('${selectedDate}')">
+          <div class="week-card-head">
+            <span class="week-card-title">${loc.formatShortDate(selDateObj.getMonth() + 1, selDateObj.getDate())} ${loc.summaryPrefix} ${selRec.mood || ''}</span>
+            <span style="color:var(--accent);font-size:13px;font-weight:600;">${loc.openDay}</span>
+          </div>
+          <div class="week-preview">
+            <div>${loc.tasksSummary(selDone, selItems.length)}</div>
+            <div style="margin-top:4px;">${escapeHTML(loc.journalSummary(selRec.journal ? selRec.journal.slice(0, 45) : ''))}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderYearView() {
+      const loc = t();
+      const store = loadStore();
+      let gridHTML = '<div class="year-grid">';
+
+      for (let m = 0; m < 12; m++) {
+        const prefix = `${calYear}-${String(m + 1).padStart(2, '0')}`;
+        let taskCount = 0;
+        let journalDays = 0;
+
+        Object.keys(store.days).forEach(k => {
+          if (k.startsWith(prefix)) {
+            taskCount += (store.days[k].tasks || []).length + (store.dailyHabits || []).length;
+            if (store.days[k].journal && store.days[k].journal.trim()) journalDays++;
+          }
+        });
+
+        gridHTML += `
+          <div class="month-box glass-surface" onclick="jumpToMonth(${m})">
+            <h3>${m + 1}${loc.monthSuffix}</h3>
+            <p>${loc.monthStats(taskCount, journalDays)}</p>
+          </div>
+        `;
+      }
+      gridHTML += '</div>';
+
+      const yearGoal = (store.goals && store.goals[calYear]) || '';
+
+      document.getElementById('appContent').innerHTML = `
+        <div class="cal-nav glass-surface" style="padding:10px 14px;margin-bottom:14px;">
+          <button onclick="changeYear(-1)">‹</button>
+          <strong>${calYear}</strong>
+          <button onclick="changeYear(1)">›</button>
+        </div>
+        ${gridHTML}
+        <div class="section-header">
+          <span class="section-title">${loc.yearGoalTitle}</span>
+        </div>
+        <div class="journal-card glass-surface">
+          <textarea class="journal-textarea" style="min-height:100px;" id="yearGoalBox" placeholder="${loc.yearGoalPlaceholder}">${escapeHTML(yearGoal)}</textarea>
+        </div>
+      `;
+
+      const yBox = document.getElementById('yearGoalBox');
+      yBox.addEventListener('input', () => {
+        const s = loadStore();
+        if (!s.goals) s.goals = {};
+        s.goals[calYear] = yBox.value;
+        saveStore(s);
+      });
+    }
+
+    window.deferTasksToTomorrow = () => {
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      const undoneNormal = (rec.tasks || []).filter(x => !x.done);
+      const undoneHabits = (store.dailyHabits || []).filter(h => !rec.doneHabits.includes(h.id));
+      const totalMoved = undoneNormal.length + undoneHabits.length;
+      if (!totalMoved) return;
+
+      const nextDate = parseISO(selectedDate);
+      nextDate.setDate(nextDate.getDate() + 1);
+      const nextISO = toISO(nextDate);
+      const nextRec = getDayRecord(store, nextISO);
+
+      rec.tasks = (rec.tasks || []).filter(x => x.done);
+      undoneNormal.forEach((x, idx) => {
+        nextRec.tasks.push({ ...x, id: Date.now() + idx });
+      });
+      undoneHabits.forEach((h, idx) => {
+        nextRec.tasks.push({ id: Date.now() + 100 + idx, title: h.title, note: h.note || '', focus: !!h.focus, done: false });
+      });
+
+      saveStore(store);
+      render();
+      showToast(t().deferredToast(totalMoved));
+    };
+
+    window.addCustomMood = () => {
+      const text = prompt(t().addMoodPrompt);
+      if (!text || !text.trim()) return;
+      const store = loadStore();
+      const label = text.trim().slice(0, 14);
+      if (!store.moods.includes(label)) store.moods.push(label);
+      const rec = getDayRecord(store, selectedDate);
+      rec.mood = label;
+      saveStore(store);
+      renderDayView();
+    };
+
+    window.removeCustomMood = (idx) => {
+      const store = loadStore();
+      if (store.moods.length <= 1) return;
+      const removed = store.moods[idx];
+      if (confirm(t().delMoodConfirm(removed))) {
+        store.moods.splice(idx, 1);
+        saveStore(store);
+        renderDayView();
+      }
+    };
+
+    window.selectMonthDay = (iso) => { selectedDate = iso; renderMonthView(); };
+    window.jumpToDay = (iso) => {
+      selectedDate = iso;
+      currentView = 'day';
+      document.querySelectorAll('.cc-tile').forEach(b => b.classList.toggle('active', b.dataset.view === 'day'));
+      render();
+    };
+    window.jumpToMonth = (m) => {
+      calMonth = m;
+      currentView = 'month';
+      document.querySelectorAll('.cc-tile').forEach(b => b.classList.toggle('active', b.dataset.view === 'month'));
+      render();
+    };
+    window.changeMonth = (delta) => {
+      calMonth += delta;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderMonthView();
+    };
+    window.changeYear = (delta) => { calYear += delta; renderYearView(); };
+
+    window.toggleTask = (id, isDailyItem) => {
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      if (isDailyItem) {
+        const idx = rec.doneHabits.indexOf(id);
+        if (idx >= 0) rec.doneHabits.splice(idx, 1);
+        else rec.doneHabits.push(id);
+      } else {
+        const item = rec.tasks.find(x => x.id === id);
+        if (item) item.done = !item.done;
+      }
+      saveStore(store);
+      render();
+    };
+
+    window.deleteTask = (id, isDailyItem) => {
+      const store = loadStore();
+      if (isDailyItem) {
+        store.dailyHabits = (store.dailyHabits || []).filter(h => h.id !== id);
+      } else {
+        const rec = getDayRecord(store, selectedDate);
+        rec.tasks = (rec.tasks || []).filter(x => x.id !== id);
+      }
+      saveStore(store);
+      render();
+    };
+
+    window.setMood = (m) => {
+      const store = loadStore();
+      const rec = getDayRecord(store, selectedDate);
+      rec.mood = rec.mood === m ? '' : m;
+      saveStore(store);
+      renderDayView();
+    };
+
+    function getWeekNumber(d) {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      const dayNum = date.getUTCDay() || 7;
+      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    const escapeHTML = (str) => String(str).replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag]));
+    const escapeAttr = (str) => escapeHTML(String(str))
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/\r/g, '\\r')
+      .replace(/\n/g, '\\n');
+
+    // Sheet
+    const focusToggle = document.getElementById('focusToggle');
+    const dailyToggle = document.getElementById('dailyToggle');
+
+    const closeSheet = () => {
+      sheet.classList.remove('open');
+      isFocus = false;
+      isDaily = false;
+      focusToggle.classList.remove('on', 'orange');
+      dailyToggle.classList.remove('on', 'blue');
+      if (!ccOpen) backdrop.classList.remove('open');
+      document.getElementById('taskInput').blur();
+    };
+
+    document.getElementById('openSheetBtn').onclick = () => {
+      setCC(false);
+      const d = parseISO(selectedDate);
+      document.getElementById('sheetTitle').textContent = `${t().newTask} · ${t().formatShortDate(d.getMonth() + 1, d.getDate())}`;
+      sheet.classList.add('open');
+      backdrop.classList.add('open');
+      setTimeout(() => document.getElementById('taskInput').focus(), 200);
+    };
+
+    document.getElementById('cancelBtn').onclick = closeSheet;
+
+    focusToggle.onclick = () => {
+      isFocus = !isFocus;
+      focusToggle.classList.toggle('on', isFocus);
+      focusToggle.classList.toggle('orange', isFocus);
+    };
+
+    dailyToggle.onclick = () => {
+      isDaily = !isDaily;
+      dailyToggle.classList.toggle('on', isDaily);
+      dailyToggle.classList.toggle('blue', isDaily);
+    };
+
+    document.getElementById('saveBtn').onclick = () => {
+      const title = document.getElementById('taskInput').value.trim();
+      const note = document.getElementById('noteInput').value.trim();
+      if (!title) return;
+
+      const store = loadStore();
+      if (isDaily) {
+        store.dailyHabits.push({ id: Date.now(), title, note, focus: isFocus });
+      } else {
+        const rec = getDayRecord(store, selectedDate);
+        rec.tasks.push({ id: Date.now(), title, note, focus: isFocus, done: false });
+      }
+      saveStore(store);
+
+      document.getElementById('taskInput').value = '';
+      document.getElementById('noteInput').value = '';
+      isFocus = false;
+      isDaily = false;
+      focusToggle.classList.remove('on', 'orange');
+      dailyToggle.classList.remove('on', 'blue');
+      closeSheet();
+      render();
+    };
+
+    selectedDate = toISO(new Date());
+    currentView = 'day';
+    applyStaticI18n();
+    render();
+  </script>
+</body>
+</html>
