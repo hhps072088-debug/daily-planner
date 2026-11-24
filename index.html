@@ -5,38 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Planner" />
+  <meta name="apple-mobile-web-app-title" content="Today" />
   <link id="appIconLink" rel="apple-touch-icon" sizes="180x180" href="" />
   <link id="favIconLink" rel="icon" type="image/png" href="" />
-  <title>Planner</title>
+  <title>Today</title>
   <style>
     :root {
-      --bg-primary: #F2F2F7;
-      --bg-secondary: #FFFFFF;
-      --bg-tertiary: #E5E5EA;
+      --bg-base: #EEF1F6;
+      --mesh-1: rgba(0, 122, 255, 0.14);
+      --mesh-2: rgba(175, 82, 222, 0.12);
+      --mesh-3: rgba(52, 199, 89, 0.10);
+      --glass-card: rgba(255, 255, 255, 0.68);
+      --glass-heavy: rgba(255, 255, 255, 0.82);
+      --glass-border: rgba(255, 255, 255, 0.75);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      --pill-bg: rgba(120, 120, 128, 0.12);
       --text-primary: #000000;
-      --text-secondary: #8E8E93;
+      --text-secondary: rgba(60, 60, 67, 0.62);
       --accent: #007AFF;
       --green: #34C759;
       --orange: #FF9500;
       --purple: #AF52DE;
       --separator: rgba(60, 60, 67, 0.12);
-      --glass: rgba(242, 242, 247, 0.85);
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-primary: #000000;
-        --bg-secondary: #1C1C1E;
-        --bg-tertiary: #2C2C2E;
+        --bg-base: #070709;
+        --mesh-1: rgba(10, 132, 255, 0.22);
+        --mesh-2: rgba(191, 90, 242, 0.18);
+        --mesh-3: rgba(48, 209, 88, 0.12);
+        --glass-card: rgba(28, 28, 30, 0.66);
+        --glass-heavy: rgba(36, 36, 38, 0.82);
+        --glass-border: rgba(255, 255, 255, 0.14);
+        --glass-shadow: 0 10px 36px rgba(0, 0, 0, 0.45);
+        --pill-bg: rgba(120, 120, 128, 0.24);
         --text-primary: #FFFFFF;
-        --text-secondary: #8E8E93;
+        --text-secondary: rgba(235, 235, 245, 0.58);
         --accent: #0A84FF;
         --green: #30D158;
         --orange: #FF9F0A;
         --purple: #BF5AF2;
         --separator: rgba(84, 84, 88, 0.36);
-        --glass: rgba(0, 0, 0, 0.85);
       }
     }
 
@@ -48,143 +58,73 @@
 
     body {
       margin: 0;
-      background-color: var(--bg-primary);
+      min-height: 100vh;
+      background-color: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% 8%, var(--mesh-1), transparent 46%),
+        radial-gradient(circle at 88% 22%, var(--mesh-2), transparent 48%),
+        radial-gradient(circle at 50% 90%, var(--mesh-3), transparent 52%);
+      background-attachment: fixed;
       color: var(--text-primary);
       padding-top: env(safe-area-inset-top);
-      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      padding-bottom: calc(106px + env(safe-area-inset-bottom));
       user-select: none;
       -webkit-font-smoothing: antialiased;
     }
 
+    /* 頂部純淨 iOS 大標題列（無按鈕干擾） */
     header {
       position: sticky;
       top: 0;
       z-index: 20;
-      background: var(--glass);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
-      padding: calc(10px + env(safe-area-inset-top)) 20px 12px;
+      background: linear-gradient(to bottom, var(--glass-heavy), rgba(255,255,255,0));
+      backdrop-filter: blur(22px) saturate(180%);
+      -webkit-backdrop-filter: blur(22px) saturate(180%);
+      padding: calc(14px + env(safe-area-inset-top)) 22px 12px;
       margin-top: calc(-1 * env(safe-area-inset-top));
-      border-bottom: 0.5px solid var(--separator);
     }
 
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 10px;
+    @media (prefers-color-scheme: dark) {
+      header {
+        background: linear-gradient(to bottom, rgba(15, 15, 18, 0.85), rgba(15, 15, 18, 0));
+      }
     }
 
     .date-sub {
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
+      letter-spacing: 0.2px;
     }
 
     h1 {
       margin: 2px 0 0;
-      font-size: 28px;
+      font-size: 34px;
       font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .pill-btn {
-      background: var(--bg-tertiary);
-      color: var(--accent);
-      border: none;
-      border-radius: 14px;
-      padding: 6px 11px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .lang-btn {
-      color: var(--text-primary);
-    }
-
-    .segmented {
-      display: flex;
-      background: var(--bg-tertiary);
-      border-radius: 9px;
-      padding: 2px;
-      margin-top: 12px;
-    }
-
-    .seg-btn {
-      flex: 1;
-      border: none;
-      background: transparent;
-      color: var(--text-primary);
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 0;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .seg-btn.active {
-      background: var(--bg-secondary);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+      letter-spacing: -0.7px;
     }
 
     main {
-      padding: 16px 20px;
+      padding: 8px 20px;
       max-width: 500px;
       margin: 0 auto;
     }
 
-    .date-strip {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      gap: 6px;
+    /* 毛玻璃通用卡片樣式 */
+    .glass-surface {
+      background: var(--glass-card);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 0.5px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 20px;
     }
-
-    .day-pill {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 8px 0;
-      border-radius: 14px;
-      background: var(--bg-secondary);
-      border: none;
-      color: var(--text-primary);
-      cursor: pointer;
-      transition: transform 0.15s ease;
-    }
-
-    .day-pill:active { transform: scale(0.94); }
-    .day-pill.active {
-      background: var(--accent);
-      color: #FFFFFF;
-    }
-    .day-pill .dow { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
-    .day-pill .dom { font-size: 15px; font-weight: 600; }
-    .day-pill .dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-top: 3px;
-      opacity: 0;
-    }
-    .day-pill.has-data .dot { opacity: 1; }
-    .day-pill.active .dot { background: #FFFFFF; }
 
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 0 6px 8px;
+      margin: 6px 6px 9px;
     }
 
     .section-title {
@@ -214,9 +154,8 @@
       cursor: pointer;
     }
 
+    /* 待辦毛玻璃列表 */
     .ios-list {
-      background: var(--bg-secondary);
-      border-radius: 16px;
       overflow: hidden;
       margin-bottom: 22px;
     }
@@ -224,8 +163,9 @@
     .task-item {
       display: flex;
       align-items: center;
-      padding: 14px 16px;
+      padding: 15px 16px;
       border-bottom: 0.5px solid var(--separator);
+      transition: background-color 0.15s ease;
     }
     .task-item:last-child { border-bottom: none; }
 
@@ -290,7 +230,7 @@
       font-size: 11px;
       font-weight: 600;
       color: var(--accent);
-      background: rgba(0, 122, 255, 0.12);
+      background: rgba(0, 122, 255, 0.14);
       padding: 1px 7px;
       border-radius: 8px;
     }
@@ -305,23 +245,21 @@
       background: none;
       border: none;
       color: var(--text-secondary);
-      font-size: 16px;
+      font-size: 15px;
       padding: 4px 6px;
       cursor: pointer;
-      opacity: 0.5;
+      opacity: 0.45;
     }
 
     .empty-state {
       text-align: center;
-      padding: 26px 16px;
+      padding: 28px 16px;
       color: var(--text-secondary);
       font-size: 14px;
     }
 
-    /* 純淨 iOS 日記卡片（無方格線） */
+    /* 隨手日記（純淨毛玻璃卡片，無格線） */
     .journal-card {
-      background: var(--bg-secondary);
-      border-radius: 16px;
       padding: 16px;
       margin-bottom: 24px;
     }
@@ -337,8 +275,8 @@
     .mood-bar::-webkit-scrollbar { display: none; }
 
     .mood-chip {
-      background: var(--bg-primary);
-      border: 1px solid transparent;
+      background: var(--pill-bg);
+      border: 0.5px solid transparent;
       border-radius: 20px;
       padding: 5px 11px;
       font-size: 13px;
@@ -349,7 +287,7 @@
     }
 
     .mood-chip.active {
-      background: rgba(0, 122, 255, 0.14);
+      background: rgba(0, 122, 255, 0.16);
       border-color: var(--accent);
       color: var(--accent);
       font-weight: 600;
@@ -363,12 +301,12 @@
 
     .journal-textarea {
       width: 100%;
-      min-height: 140px;
+      min-height: 150px;
       border: none;
       background: transparent;
       color: var(--text-primary);
       font-size: 15px;
-      line-height: 1.55;
+      line-height: 1.6;
       resize: none;
       outline: none;
       user-select: text;
@@ -388,10 +326,8 @@
       border-top: 0.5px solid var(--separator);
     }
 
-    /* 週視圖 */
+    /* 週 / 月 / 年 視圖卡片 */
     .week-card {
-      background: var(--bg-secondary);
-      border-radius: 16px;
       padding: 14px 16px;
       margin-bottom: 12px;
       cursor: pointer;
@@ -406,12 +342,9 @@
     .week-card-count { font-size: 12px; color: var(--text-secondary); }
     .week-preview { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
 
-    /* 月視圖 */
     .calendar-card {
-      background: var(--bg-secondary);
-      border-radius: 18px;
       padding: 16px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
     .cal-nav {
       display: flex;
@@ -420,7 +353,7 @@
       margin-bottom: 14px;
     }
     .cal-nav button {
-      background: var(--bg-primary);
+      background: var(--pill-bg);
       border: none;
       color: var(--accent);
       width: 30px;
@@ -451,7 +384,7 @@
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      background: var(--bg-primary);
+      background: var(--pill-bg);
     }
     .cal-cell.empty { background: transparent; cursor: default; }
     .cal-cell.selected { background: var(--accent); color: #fff; font-weight: 700; }
@@ -465,62 +398,210 @@
     .cal-cell.selected .cal-dot-task,
     .cal-cell.selected .cal-dot-note { background: #fff; }
 
-    /* 年視圖 */
     .year-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .month-box {
-      background: var(--bg-secondary);
-      border-radius: 14px;
       padding: 14px 12px;
       cursor: pointer;
     }
     .month-box h3 { margin: 0 0 6px; font-size: 16px; }
     .month-box p { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
 
-    /* FAB */
-    .fab {
+    /* ================= 左下角 iOS 懸浮控制中心 ================= */
+    .cc-anchor {
       position: fixed;
-      right: 22px;
+      left: 20px;
       bottom: calc(20px + env(safe-area-inset-bottom));
-      width: 56px;
-      height: 56px;
-      border-radius: 28px;
-      background: var(--accent);
-      color: #fff;
+      z-index: 35;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    /* 控制中心展開面板 */
+    .cc-popover {
+      width: 268px;
+      background: var(--glass-heavy);
+      backdrop-filter: blur(36px) saturate(210%);
+      -webkit-backdrop-filter: blur(36px) saturate(210%);
+      border: 0.5px solid var(--glass-border);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+      border-radius: 26px;
+      padding: 14px;
+      margin-bottom: 12px;
+      transform-origin: bottom left;
+      transform: scale(0.85) translateY(12px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .cc-popover.open {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .cc-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 2px 4px 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .cc-grid-views {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .cc-tile {
+      background: var(--pill-bg);
       border: none;
-      font-size: 28px;
+      border-radius: 14px;
+      padding: 10px 4px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .cc-tile:active { transform: scale(0.94); }
+    .cc-tile.active {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+
+    .cc-row-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .cc-action-btn {
+      background: var(--pill-bg);
+      border: none;
+      border-radius: 14px;
+      padding: 11px 10px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
+      gap: 6px;
+    }
+    .cc-action-btn:active { transform: scale(0.95); }
+
+    /* 左下角控制中心觸發膠囊按鈕 */
+    .cc-trigger {
+      height: 52px;
+      padding: 0 16px;
+      border-radius: 26px;
+      background: var(--glass-heavy);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border: 0.5px solid var(--glass-border);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      z-index: 30;
+      transition: transform 0.15s ease;
+    }
+    .cc-trigger:active { transform: scale(0.94); }
+
+    .cc-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+    }
+    .cc-icon span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      background: var(--text-primary);
+      border-radius: 2px;
+      position: relative;
+    }
+    .cc-icon span::after {
+      content: '';
+      position: absolute;
+      top: -2.5px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .cc-icon span:first-child::after { right: 2px; }
+    .cc-icon span:last-child::after { left: 2px; }
+
+    /* 右下角毛玻璃新增按鈕 */
+    .fab {
+      position: fixed;
+      right: 20px;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      width: 52px;
+      height: 52px;
+      border-radius: 26px;
+      background: rgba(0, 122, 255, 0.88);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 0.5px solid rgba(255, 255, 255, 0.45);
+      color: #fff;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 26px rgba(0, 122, 255, 0.35);
+      cursor: pointer;
+      z-index: 35;
+      transition: transform 0.15s ease;
     }
     .fab:active { transform: scale(0.92); }
 
-    /* Bottom Sheet */
-    .sheet-backdrop {
+    /* 遮罩與 Bottom Sheet */
+    .backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 40;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 30;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.25s ease;
     }
-    .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+    .backdrop.open { opacity: 1; pointer-events: auto; }
 
     .sheet {
       position: fixed;
       left: 0;
       right: 0;
       bottom: 0;
-      background: var(--bg-secondary);
-      border-radius: 22px 22px 0 0;
+      background: var(--glass-heavy);
+      backdrop-filter: blur(36px) saturate(210%);
+      -webkit-backdrop-filter: blur(36px) saturate(210%);
+      border-top: 0.5px solid var(--glass-border);
+      border-radius: 24px 24px 0 0;
       padding: 12px 20px calc(24px + env(safe-area-inset-bottom));
       z-index: 50;
       transform: translateY(100%);
@@ -533,7 +614,7 @@
     .grabber {
       width: 36px;
       height: 5px;
-      background: var(--bg-tertiary);
+      background: var(--pill-bg);
       border-radius: 3px;
       margin: 0 auto 14px;
     }
@@ -555,8 +636,8 @@
     .sheet-header button.save { font-weight: 600; }
 
     .input-group {
-      background: var(--bg-primary);
-      border-radius: 12px;
+      background: var(--pill-bg);
+      border-radius: 14px;
       padding: 12px 14px;
       margin-bottom: 12px;
       display: flex;
@@ -577,7 +658,7 @@
       width: 48px;
       height: 28px;
       border-radius: 14px;
-      background: var(--bg-tertiary);
+      background: rgba(120, 120, 128, 0.25);
       position: relative;
       cursor: pointer;
       transition: background 0.2s;
@@ -594,6 +675,7 @@
       top: 2px;
       left: 2px;
       transition: transform 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .toggle-switch.on .toggle-knob { transform: translateX(20px); }
 
@@ -602,13 +684,16 @@
       top: calc(16px + env(safe-area-inset-top));
       left: 50%;
       transform: translate(-50%, -80px);
-      background: var(--bg-secondary);
+      background: var(--glass-heavy);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 0.5px solid var(--glass-border);
       color: var(--text-primary);
       padding: 10px 18px;
       border-radius: 20px;
       font-size: 13px;
       font-weight: 600;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
       z-index: 60;
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
@@ -619,32 +704,50 @@
 <body>
 
   <div class="toast" id="toast"></div>
+  <div class="backdrop" id="backdrop"></div>
 
+  <!-- 純淨大標題列（主頁僅保留日期與「今天」） -->
   <header>
-    <div class="header-top">
-      <div>
-        <div class="date-sub" id="subLabel"></div>
-        <h1 id="mainTitle"></h1>
-      </div>
-      <div class="header-actions">
-        <button class="pill-btn lang-btn" id="langBtn">EN</button>
-        <button class="pill-btn" id="todayBtn"></button>
-      </div>
-    </div>
-
-    <div class="segmented" id="viewSwitcher">
-      <button class="seg-btn active" data-view="day"></button>
-      <button class="seg-btn" data-view="week"></button>
-      <button class="seg-btn" data-view="month"></button>
-      <button class="seg-btn" data-view="year"></button>
-    </div>
+    <div class="date-sub" id="subLabel"></div>
+    <h1 id="mainTitle"></h1>
   </header>
 
   <main id="appContent"></main>
 
+  <!-- 左下角 iOS 懸浮控制中心 -->
+  <div class="cc-anchor">
+    <div class="cc-popover" id="ccPopover">
+      <div class="cc-label" id="ccViewLabel"></div>
+      <div class="cc-grid-views" id="viewSwitcher">
+        <button class="cc-tile active" data-view="day">
+          <span>☀️</span><span data-label="day"></span>
+        </button>
+        <button class="cc-tile" data-view="week">
+          <span>🗓️</span><span data-label="week"></span>
+        </button>
+        <button class="cc-tile" data-view="month">
+          <span>📆</span><span data-label="month"></span>
+        </button>
+        <button class="cc-tile" data-view="year">
+          <span>✨</span><span data-label="year"></span>
+        </button>
+      </div>
+      <div class="cc-row-actions">
+        <button class="cc-action-btn" id="todayBtn">⌖ <span id="todayLabel"></span></button>
+        <button class="cc-action-btn" id="langBtn">🌐 <span id="langLabel"></span></button>
+      </div>
+    </div>
+
+    <button class="cc-trigger" id="ccTrigger" aria-label="Control Center">
+      <div class="cc-icon"><span></span><span></span></div>
+      <span id="ccCurrentBadge"></span>
+    </button>
+  </div>
+
+  <!-- 右下角毛玻璃新增按鈕 -->
   <button class="fab" id="openSheetBtn" aria-label="Add">＋</button>
 
-  <div class="sheet-backdrop" id="backdrop"></div>
+  <!-- 新增任務 Bottom Sheet -->
   <div class="sheet" id="sheet">
     <div class="grabber"></div>
     <div class="sheet-header">
@@ -696,17 +799,18 @@
 
     const I18N = {
       'zh-TW': {
-        langSwitch: 'EN',
-        today: '今天',
-        views: { day: '日', week: '週', month: '月', year: '年' },
-        todayPlan: '今日計畫',
+        langSwitch: 'English',
+        today: '回到今天',
+        ccViewsTitle: '控制中心 · 檢視模式',
+        views: { day: '今天', week: '週', month: '月', year: '年' },
+        todayPlan: '今天',
         planSuffix: '計畫',
         weekPrefix: '第',
         weekSuffix: '週',
         monthSuffix: '月',
         yearTitle: '年',
         yearSub: '年度軌跡與目標',
-        todoTitle: '待辦清單',
+        todoTitle: '待辦事項',
         deferBtn: '順延至明天 ↷',
         deferredToast: (n) => `已順延 ${n} 項未完成任務至明天`,
         emptyTasks: '沒有待辦事項，點擊右下角 ＋ 新增',
@@ -744,9 +848,10 @@
         formatShortDate: (m, d) => `${m}/${d}`
       },
       'en': {
-        langSwitch: '中文',
-        today: 'Today',
-        views: { day: 'Day', week: 'Week', month: 'Month', year: 'Year' },
+        langSwitch: '繁體中文',
+        today: 'Back to Today',
+        ccViewsTitle: 'Control Center · View',
+        views: { day: 'Today', week: 'Week', month: 'Month', year: 'Year' },
         todayPlan: 'Today',
         planSuffix: 'Plan',
         weekPrefix: 'Week',
@@ -801,6 +906,7 @@
     let calMonth = new Date().getMonth();
     let isFocus = false;
     let isDaily = false;
+    let ccOpen = false;
 
     const t = () => I18N[lang];
 
@@ -835,7 +941,6 @@
       return store.days[iso];
     }
 
-    // 合併「當天一次性任務」與「每天重複計畫」
     function getCombinedTasks(store, iso) {
       const rec = getDayRecord(store, iso);
       const habits = (store.dailyHabits || []).map(h => ({
@@ -876,22 +981,45 @@
       }
     }
 
+    // 控制中心開關與遮罩控制
+    const ccPopover = document.getElementById('ccPopover');
+    const backdrop = document.getElementById('backdrop');
+    const sheet = document.getElementById('sheet');
+
+    function setCC(open) {
+      ccOpen = open;
+      ccPopover.classList.toggle('open', open);
+      backdrop.classList.toggle('open', open);
+    }
+
+    document.getElementById('ccTrigger').onclick = (e) => {
+      e.stopPropagation();
+      setCC(!ccOpen);
+    };
+
+    backdrop.onclick = () => {
+      setCC(false);
+      closeSheet();
+    };
+
     document.getElementById('langBtn').onclick = () => {
       lang = lang === 'zh-TW' ? 'en' : 'zh-TW';
       localStorage.setItem('apple_ios_planner_lang', lang);
       document.documentElement.lang = lang;
       applyStaticI18n();
       render();
+      setCC(false);
     };
 
-    document.querySelectorAll('.seg-btn').forEach(btn => {
+    document.querySelectorAll('.cc-tile').forEach(btn => {
       btn.onclick = () => {
-        document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.cc-tile').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentView = btn.dataset.view;
         const d = parseISO(selectedDate);
         calYear = d.getFullYear();
         calMonth = d.getMonth();
+        setCC(false);
         render();
       };
     });
@@ -900,473 +1028,4 @@
       const now = new Date();
       selectedDate = toISO(now);
       calYear = now.getFullYear();
-      calMonth = now.getMonth();
-      render();
-    };
-
-    function applyStaticI18n() {
-      const loc = t();
-      document.getElementById('langBtn').textContent = loc.langSwitch;
-      document.getElementById('todayBtn').textContent = loc.today;
-      document.querySelectorAll('.seg-btn').forEach(btn => {
-        btn.textContent = loc.views[btn.dataset.view];
-      });
-      document.getElementById('cancelBtn').textContent = loc.cancel;
-      document.getElementById('saveBtn').textContent = loc.add;
-      document.getElementById('taskInput').placeholder = loc.taskPlaceholder;
-      document.getElementById('noteInput').placeholder = loc.notePlaceholder;
-      document.getElementById('dailyLabel').textContent = loc.dailyToggle;
-      document.getElementById('focusLabel').textContent = loc.focusToggle;
-    }
-
-    function render() {
-      const loc = t();
-      const d = parseISO(selectedDate);
-      const sub = document.getElementById('subLabel');
-      const title = document.getElementById('mainTitle');
-      const fab = document.getElementById('openSheetBtn');
-
-      if (currentView === 'day') {
-        sub.textContent = loc.formatDate(d.getFullYear(), d.getMonth() + 1, d.getDate(), loc.dows[d.getDay()]);
-        title.textContent = selectedDate === toISO(new Date())
-          ? loc.todayPlan
-          : `${loc.formatShortDate(d.getMonth() + 1, d.getDate())} ${loc.planSuffix}`.trim();
-        fab.style.display = 'flex';
-        renderDayView();
-      } else if (currentView === 'week') {
-        sub.textContent = `${d.getFullYear()} ${loc.weekPrefix} ${getWeekNumber(d)} ${loc.weekSuffix}`.trim();
-        title.textContent = loc.views.week;
-        fab.style.display = 'flex';
-        renderWeekView();
-      } else if (currentView === 'month') {
-        sub.textContent = `${calYear}`;
-        title.textContent = `${calMonth + 1}${loc.monthSuffix}`;
-        fab.style.display = 'flex';
-        renderMonthView();
-      } else if (currentView === 'year') {
-        sub.textContent = loc.yearSub;
-        title.textContent = `${calYear} ${loc.yearTitle}`.trim();
-        fab.style.display = 'none';
-        renderYearView();
-      }
-    }
-
-    function renderDayView() {
-      const loc = t();
-      const store = loadStore();
-      const rec = getDayRecord(store, selectedDate);
-      const combined = getCombinedTasks(store, selectedDate);
-      const base = parseISO(selectedDate);
-
-      let stripHTML = '<div class="date-strip">';
-      for (let i = -3; i <= 3; i++) {
-        const dt = new Date(base);
-        dt.setDate(base.getDate() + i);
-        const iso = toISO(dt);
-        const dayTasks = getCombinedTasks(store, iso);
-        const dayRec = store.days[iso];
-        const hasData = dayTasks.length > 0 || (dayRec && dayRec.journal && dayRec.journal.trim().length > 0);
-        stripHTML += `
-          <button class="day-pill ${iso === selectedDate ? 'active' : ''} ${hasData ? 'has-data' : ''}" onclick="selectDay('${iso}')">
-            <span class="dow">${loc.dows[dt.getDay()]}</span>
-            <span class="dom">${dt.getDate()}</span>
-            <span class="dot"></span>
-          </button>
-        `;
-      }
-      stripHTML += '</div>';
-
-      const sorted = [...combined].sort((a, b) => (a.done - b.done) || (b.focus - a.focus));
-      const doneCount = combined.filter(x => x.done).length;
-      const undoneCount = combined.length - doneCount;
-
-      const tasksHTML = sorted.length ? sorted.map(item => `
-        <div class="task-item ${item.done ? 'done' : ''}">
-          <div class="check-btn" onclick="toggleTask(${item.id}, ${item.daily})">
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          </div>
-          <div class="task-info" onclick="toggleTask(${item.id}, ${item.daily})">
-            <div class="task-title">${item.focus ? '<span class="focus-star">★</span>' : ''}${escapeHTML(item.title)}</div>
-            <div class="task-meta-row">
-              ${item.daily ? `<span class="daily-tag">↻ ${loc.dailyBadge}</span>` : ''}
-              ${item.note ? `<span class="task-note">${escapeHTML(item.note)}</span>` : ''}
-            </div>
-          </div>
-          <button class="del-btn" onclick="deleteTask(${item.id}, ${item.daily})">✕</button>
-        </div>
-      `).join('') : `<div class="empty-state">${loc.emptyTasks}</div>`;
-
-      const moodHTML = store.moods.map((m, idx) => `
-        <button class="mood-chip ${rec.mood === m ? 'active' : ''}"
-                onclick="setMood('${escapeAttr(m)}')"
-                ondblclick="removeCustomMood(${idx})">${escapeHTML(m)}</button>
-      `).join('') + `<button class="mood-chip mood-add" onclick="addCustomMood()">＋</button>`;
-
-      document.getElementById('appContent').innerHTML = `
-        ${stripHTML}
-        <div class="section-header">
-          <span class="section-title">${loc.todoTitle}</span>
-          <div class="section-actions">
-            ${undoneCount > 0 ? `<button class="defer-btn" onclick="deferTasksToTomorrow()">${loc.deferBtn}</button>` : ''}
-            <span class="section-badge">${doneCount}/${combined.length}</span>
-          </div>
-        </div>
-        <div class="ios-list">${tasksHTML}</div>
-
-        <div class="section-header">
-          <span class="section-title">${loc.journalTitle}</span>
-          <span class="section-badge" id="saveStatus">${loc.autoSaved}</span>
-        </div>
-        <div class="journal-card">
-          <div class="mood-bar">${moodHTML}</div>
-          <textarea class="journal-textarea" id="journalBox" placeholder="${loc.journalPlaceholder}">${escapeHTML(rec.journal || '')}</textarea>
-          <div class="journal-footer">
-            <span>${loc.journalTitle}</span>
-            <span id="charCount">${loc.chars((rec.journal || '').length)}</span>
-          </div>
-        </div>
-      `;
-
-      const box = document.getElementById('journalBox');
-      box.addEventListener('input', () => {
-        const s = loadStore();
-        const r = getDayRecord(s, selectedDate);
-        r.journal = box.value;
-        saveStore(s);
-        document.getElementById('charCount').textContent = t().chars(box.value.length);
-        document.getElementById('saveStatus').textContent = t().savedToast;
-      });
-    }
-
-    function renderWeekView() {
-      const loc = t();
-      const store = loadStore();
-      const base = parseISO(selectedDate);
-      const dayOfWeek = base.getDay();
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const monday = new Date(base);
-      monday.setDate(base.getDate() + mondayOffset);
-
-      let html = '';
-      for (let i = 0; i < 7; i++) {
-        const dt = new Date(monday);
-        dt.setDate(monday.getDate() + i);
-        const iso = toISO(dt);
-        const rec = store.days[iso] || { journal: '', mood: '' };
-        const items = getCombinedTasks(store, iso);
-        const done = items.filter(x => x.done).length;
-        const previewTasks = items.slice(0, 2).map(x => `${x.done ? '✓' : '○'} ${x.title}`).join(' ');
-        const snippet = rec.journal ? rec.journal.trim().split('\n')[0].slice(0, 28) : '';
-
-        html += `
-          <div class="week-card" onclick="jumpToDay('${iso}')">
-            <div class="week-card-head">
-              <span class="week-card-title">${loc.weekDows[i]} · ${loc.formatShortDate(dt.getMonth() + 1, dt.getDate())} ${rec.mood || ''}</span>
-              <span class="week-card-count">${items.length ? loc.items(done, items.length) : loc.noTask}</span>
-            </div>
-            <div class="week-preview">
-              ${previewTasks ? `<div>${escapeHTML(previewTasks)}</div>` : ''}
-              ${snippet ? `<div style="color:var(--purple);margin-top:3px;">✎ ${escapeHTML(snippet)}...</div>` : ''}
-              ${!previewTasks && !snippet ? loc.clickPlan : ''}
-            </div>
-          </div>
-        `;
-      }
-      document.getElementById('appContent').innerHTML = html;
-    }
-
-    function renderMonthView() {
-      const loc = t();
-      const store = loadStore();
-      const firstDay = new Date(calYear, calMonth, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-
-      let cells = loc.dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
-      for (let i = 0; i < firstDay; i++) cells += `<div class="cal-cell empty"></div>`;
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const iso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const rec = store.days[iso];
-        const hasTask = getCombinedTasks(store, iso).length > 0;
-        const hasJournal = rec && rec.journal && rec.journal.trim().length > 0;
-
-        cells += `
-          <div class="cal-cell ${iso === selectedDate ? 'selected' : ''}" onclick="selectMonthDay('${iso}')">
-            <span>${day}</span>
-            <div class="cal-dots">
-              ${hasTask ? '<span class="cal-dot-task"></span>' : ''}
-              ${hasJournal ? '<span class="cal-dot-note"></span>' : ''}
-            </div>
-          </div>
-        `;
-      }
-
-      const selRec = store.days[selectedDate] || { journal: '', mood: '' };
-      const selItems = getCombinedTasks(store, selectedDate);
-      const selDone = selItems.filter(x => x.done).length;
-      const selDateObj = parseISO(selectedDate);
-
-      document.getElementById('appContent').innerHTML = `
-        <div class="calendar-card">
-          <div class="cal-nav">
-            <button onclick="changeMonth(-1)">‹</button>
-            <strong>${calYear} / ${calMonth + 1}</strong>
-            <button onclick="changeMonth(1)">›</button>
-          </div>
-          <div class="cal-grid">${cells}</div>
-          <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:11px;color:var(--text-secondary);">
-            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;"></i>${loc.hasPlan}</span>
-            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--purple);margin-right:4px;"></i>${loc.hasJournal}</span>
-          </div>
-        </div>
-
-        <div class="week-card" onclick="jumpToDay('${selectedDate}')">
-          <div class="week-card-head">
-            <span class="week-card-title">${loc.formatShortDate(selDateObj.getMonth() + 1, selDateObj.getDate())} ${loc.summaryPrefix} ${selRec.mood || ''}</span>
-            <span style="color:var(--accent);font-size:13px;font-weight:600;">${loc.openDay}</span>
-          </div>
-          <div class="week-preview">
-            <div>${loc.tasksSummary(selDone, selItems.length)}</div>
-            <div style="margin-top:4px;">${escapeHTML(loc.journalSummary(selRec.journal ? selRec.journal.slice(0, 45) : ''))}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderYearView() {
-      const loc = t();
-      const store = loadStore();
-      let gridHTML = '<div class="year-grid">';
-
-      for (let m = 0; m < 12; m++) {
-        const prefix = `${calYear}-${String(m + 1).padStart(2, '0')}`;
-        let taskCount = 0;
-        let journalDays = 0;
-
-        Object.keys(store.days).forEach(k => {
-          if (k.startsWith(prefix)) {
-            taskCount += (store.days[k].tasks || []).length + (store.dailyHabits || []).length;
-            if (store.days[k].journal && store.days[k].journal.trim()) journalDays++;
-          }
-        });
-
-        gridHTML += `
-          <div class="month-box" onclick="jumpToMonth(${m})">
-            <h3>${m + 1}${loc.monthSuffix}</h3>
-            <p>${loc.monthStats(taskCount, journalDays)}</p>
-          </div>
-        `;
-      }
-      gridHTML += '</div>';
-
-      const yearGoal = (store.goals && store.goals[calYear]) || '';
-
-      document.getElementById('appContent').innerHTML = `
-        <div class="cal-nav" style="background:var(--bg-secondary);padding:10px 14px;border-radius:14px;margin-bottom:14px;">
-          <button onclick="changeYear(-1)">‹</button>
-          <strong>${calYear}</strong>
-          <button onclick="changeYear(1)">›</button>
-        </div>
-        ${gridHTML}
-        <div class="section-header">
-          <span class="section-title">${loc.yearGoalTitle}</span>
-        </div>
-        <div class="journal-card">
-          <textarea class="journal-textarea" style="min-height:100px;" id="yearGoalBox" placeholder="${loc.yearGoalPlaceholder}">${escapeHTML(yearGoal)}</textarea>
-        </div>
-      `;
-
-      const yBox = document.getElementById('yearGoalBox');
-      yBox.addEventListener('input', () => {
-        const s = loadStore();
-        if (!s.goals) s.goals = {};
-        s.goals[calYear] = yBox.value;
-        saveStore(s);
-      });
-    }
-
-    // 順延當天一次性未完成任務至隔天
-    window.deferTasksToTomorrow = () => {
-      const store = loadStore();
-      const rec = getDayRecord(store, selectedDate);
-      const undoneNormal = (rec.tasks || []).filter(x => !x.done);
-      const undoneHabits = (store.dailyHabits || []).filter(h => !rec.doneHabits.includes(h.id));
-      const totalMoved = undoneNormal.length + undoneHabits.length;
-      if (!totalMoved) return;
-
-      const nextDate = parseISO(selectedDate);
-      nextDate.setDate(nextDate.getDate() + 1);
-      const nextISO = toISO(nextDate);
-      const nextRec = getDayRecord(store, nextISO);
-
-      rec.tasks = (rec.tasks || []).filter(x => x.done);
-      undoneNormal.forEach((x, idx) => {
-        nextRec.tasks.push({ ...x, id: Date.now() + idx });
-      });
-      undoneHabits.forEach((h, idx) => {
-        nextRec.tasks.push({ id: Date.now() + 100 + idx, title: h.title, note: h.note || '', focus: !!h.focus, done: false });
-      });
-
-      saveStore(store);
-      render();
-      showToast(t().deferredToast(totalMoved));
-    };
-
-    window.addCustomMood = () => {
-      const text = prompt(t().addMoodPrompt);
-      if (!text || !text.trim()) return;
-      const store = loadStore();
-      const label = text.trim().slice(0, 14);
-      if (!store.moods.includes(label)) store.moods.push(label);
-      const rec = getDayRecord(store, selectedDate);
-      rec.mood = label;
-      saveStore(store);
-      renderDayView();
-    };
-
-    window.removeCustomMood = (idx) => {
-      const store = loadStore();
-      if (store.moods.length <= 1) return;
-      const removed = store.moods[idx];
-      if (confirm(t().delMoodConfirm(removed))) {
-        store.moods.splice(idx, 1);
-        saveStore(store);
-        renderDayView();
-      }
-    };
-
-    window.selectDay = (iso) => { selectedDate = iso; render(); };
-    window.selectMonthDay = (iso) => { selectedDate = iso; renderMonthView(); };
-    window.jumpToDay = (iso) => {
-      selectedDate = iso;
-      currentView = 'day';
-      document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.view === 'day'));
-      render();
-    };
-    window.jumpToMonth = (m) => {
-      calMonth = m;
-      currentView = 'month';
-      document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.view === 'month'));
-      render();
-    };
-    window.changeMonth = (delta) => {
-      calMonth += delta;
-      if (calMonth < 0) { calMonth = 11; calYear--; }
-      if (calMonth > 11) { calMonth = 0; calYear++; }
-      renderMonthView();
-    };
-    window.changeYear = (delta) => { calYear += delta; renderYearView(); };
-
-    window.toggleTask = (id, isDailyItem) => {
-      const store = loadStore();
-      const rec = getDayRecord(store, selectedDate);
-      if (isDailyItem) {
-        const idx = rec.doneHabits.indexOf(id);
-        if (idx >= 0) rec.doneHabits.splice(idx, 1);
-        else rec.doneHabits.push(id);
-      } else {
-        const item = rec.tasks.find(x => x.id === id);
-        if (item) item.done = !item.done;
-      }
-      saveStore(store);
-      render();
-    };
-
-    window.deleteTask = (id, isDailyItem) => {
-      const store = loadStore();
-      if (isDailyItem) {
-        store.dailyHabits = (store.dailyHabits || []).filter(h => h.id !== id);
-      } else {
-        const rec = getDayRecord(store, selectedDate);
-        rec.tasks = (rec.tasks || []).filter(x => x.id !== id);
-      }
-      saveStore(store);
-      render();
-    };
-
-    window.setMood = (m) => {
-      const store = loadStore();
-      const rec = getDayRecord(store, selectedDate);
-      rec.mood = rec.mood === m ? '' : m;
-      saveStore(store);
-      renderDayView();
-    };
-
-    function getWeekNumber(d) {
-      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      const dayNum = date.getUTCDay() || 7;
-      date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-      return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-    }
-
-    const escapeHTML = (str) => String(str).replace(/[&<>'"]/g, tag => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-    }[tag]));
-    const escapeAttr = (str) => String(str).replace(/'/g, "\\'");
-
-    // Sheet
-    const sheet = document.getElementById('sheet');
-    const backdrop = document.getElementById('backdrop');
-    const focusToggle = document.getElementById('focusToggle');
-    const dailyToggle = document.getElementById('dailyToggle');
-
-    const closeSheet = () => {
-      sheet.classList.remove('open');
-      backdrop.classList.remove('open');
-      document.getElementById('taskInput').blur();
-    };
-
-    document.getElementById('openSheetBtn').onclick = () => {
-      const d = parseISO(selectedDate);
-      document.getElementById('sheetTitle').textContent = `${t().newTask} · ${t().formatShortDate(d.getMonth() + 1, d.getDate())}`;
-      sheet.classList.add('open');
-      backdrop.classList.add('open');
-      setTimeout(() => document.getElementById('taskInput').focus(), 200);
-    };
-
-    document.getElementById('cancelBtn').onclick = closeSheet;
-    backdrop.onclick = closeSheet;
-
-    focusToggle.onclick = () => {
-      isFocus = !isFocus;
-      focusToggle.classList.toggle('on', isFocus);
-      focusToggle.classList.toggle('orange', isFocus);
-    };
-
-    dailyToggle.onclick = () => {
-      isDaily = !isDaily;
-      dailyToggle.classList.toggle('on', isDaily);
-      dailyToggle.classList.toggle('blue', isDaily);
-    };
-
-    document.getElementById('saveBtn').onclick = () => {
-      const title = document.getElementById('taskInput').value.trim();
-      const note = document.getElementById('noteInput').value.trim();
-      if (!title) return;
-
-      const store = loadStore();
-      if (isDaily) {
-        store.dailyHabits.push({ id: Date.now(), title, note, focus: isFocus });
-      } else {
-        const rec = getDayRecord(store, selectedDate);
-        rec.tasks.push({ id: Date.now(), title, note, focus: isFocus, done: false });
-      }
-      saveStore(store);
-
-      document.getElementById('taskInput').value = '';
-      document.getElementById('noteInput').value = '';
-      isFocus = false;
-      isDaily = false;
-      focusToggle.classList.remove('on', 'orange');
-      dailyToggle.classList.remove('on', 'blue');
-      closeSheet();
-      render();
-    };
-
-    initSample();
-    applyStaticI18n();
-    render();
-  </script>
-</body>
-</html>
+      calMonth = now
