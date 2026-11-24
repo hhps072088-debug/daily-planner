@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="極簡計畫" />
+  <meta name="apple-mobile-web-app-title" content="Planner" />
   <link id="appIconLink" rel="apple-touch-icon" sizes="180x180" href="" />
   <link id="favIconLink" rel="icon" type="image/png" href="" />
-  <title>極簡計畫</title>
+  <title>Planner</title>
   <style>
     :root {
       --bg-primary: #F2F2F7;
@@ -22,7 +22,6 @@
       --purple: #AF52DE;
       --separator: rgba(60, 60, 67, 0.12);
       --glass: rgba(242, 242, 247, 0.85);
-      --grid-line: rgba(0, 0, 0, 0.055);
     }
 
     @media (prefers-color-scheme: dark) {
@@ -38,7 +37,6 @@
         --purple: #BF5AF2;
         --separator: rgba(84, 84, 88, 0.36);
         --glass: rgba(0, 0, 0, 0.85);
-        --grid-line: rgba(255, 255, 255, 0.06);
       }
     }
 
@@ -74,6 +72,7 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+      gap: 10px;
     }
 
     .date-sub {
@@ -89,15 +88,25 @@
       letter-spacing: -0.5px;
     }
 
-    .today-btn {
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .pill-btn {
       background: var(--bg-tertiary);
       color: var(--accent);
       border: none;
       border-radius: 14px;
-      padding: 6px 12px;
+      padding: 6px 11px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
+    }
+
+    .lang-btn {
+      color: var(--text-primary);
     }
 
     .segmented {
@@ -204,7 +213,6 @@
       padding: 0;
       cursor: pointer;
     }
-    .defer-btn:active { opacity: 0.6; }
 
     .ios-list {
       background: var(--bg-secondary);
@@ -265,16 +273,32 @@
       color: var(--text-secondary);
     }
 
+    .task-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+      flex-wrap: wrap;
+    }
+
     .task-note {
       font-size: 13px;
       color: var(--text-secondary);
-      margin-top: 2px;
+    }
+
+    .daily-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(0, 122, 255, 0.12);
+      padding: 1px 7px;
+      border-radius: 8px;
     }
 
     .focus-star {
       color: var(--orange);
       font-size: 13px;
-      margin-right: 6px;
+      margin-right: 5px;
     }
 
     .del-btn {
@@ -294,17 +318,12 @@
       font-size: 14px;
     }
 
-    /* 每日格線日記 */
-    .grid-journal-card {
-      background-color: var(--bg-secondary);
-      background-image:
-        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-      background-size: 20px 20px;
+    /* 純淨 iOS 日記卡片（無方格線） */
+    .journal-card {
+      background: var(--bg-secondary);
       border-radius: 16px;
       padding: 16px;
       margin-bottom: 24px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
     }
 
     .mood-bar {
@@ -349,7 +368,7 @@
       background: transparent;
       color: var(--text-primary);
       font-size: 15px;
-      line-height: 20px;
+      line-height: 1.55;
       resize: none;
       outline: none;
       user-select: text;
@@ -364,10 +383,12 @@
       justify-content: space-between;
       font-size: 11px;
       color: var(--text-secondary);
-      margin-top: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 0.5px solid var(--separator);
     }
 
-    /* 週視圖卡片 */
+    /* 週視圖 */
     .week-card {
       background: var(--bg-secondary);
       border-radius: 16px;
@@ -385,7 +406,7 @@
     .week-card-count { font-size: 12px; color: var(--text-secondary); }
     .week-preview { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
 
-    /* 月視圖日曆 */
+    /* 月視圖 */
     .calendar-card {
       background: var(--bg-secondary);
       border-radius: 18px;
@@ -444,7 +465,7 @@
     .cal-cell.selected .cal-dot-task,
     .cal-cell.selected .cal-dot-note { background: #fff; }
 
-    /* 年視圖總覽 */
+    /* 年視圖 */
     .year-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -460,7 +481,7 @@
     .month-box h3 { margin: 0 0 6px; font-size: 16px; }
     .month-box p { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
 
-    /* 懸浮新增按鈕 */
+    /* FAB */
     .fab {
       position: fixed;
       right: 22px;
@@ -481,7 +502,7 @@
     }
     .fab:active { transform: scale(0.92); }
 
-    /* iOS Bottom Sheet */
+    /* Bottom Sheet */
     .sheet-backdrop {
       position: fixed;
       inset: 0;
@@ -562,7 +583,8 @@
       transition: background 0.2s;
       flex-shrink: 0;
     }
-    .toggle-switch.on { background: var(--orange); }
+    .toggle-switch.on.orange { background: var(--orange); }
+    .toggle-switch.on.blue { background: var(--accent); }
     .toggle-knob {
       width: 24px;
       height: 24px;
@@ -575,7 +597,6 @@
     }
     .toggle-switch.on .toggle-knob { transform: translateX(20px); }
 
-    /* 輕量提示 Toast */
     .toast {
       position: fixed;
       top: calc(16px + env(safe-area-inset-top));
@@ -602,93 +623,186 @@
   <header>
     <div class="header-top">
       <div>
-        <div class="date-sub" id="subLabel">2026年11月24日</div>
-        <h1 id="mainTitle">今日計畫</h1>
+        <div class="date-sub" id="subLabel"></div>
+        <h1 id="mainTitle"></h1>
       </div>
-      <button class="today-btn" id="todayBtn">回到今天</button>
+      <div class="header-actions">
+        <button class="pill-btn lang-btn" id="langBtn">EN</button>
+        <button class="pill-btn" id="todayBtn"></button>
+      </div>
     </div>
 
     <div class="segmented" id="viewSwitcher">
-      <button class="seg-btn active" data-view="day">日</button>
-      <button class="seg-btn" data-view="week">週</button>
-      <button class="seg-btn" data-view="month">月</button>
-      <button class="seg-btn" data-view="year">年</button>
+      <button class="seg-btn active" data-view="day"></button>
+      <button class="seg-btn" data-view="week"></button>
+      <button class="seg-btn" data-view="month"></button>
+      <button class="seg-btn" data-view="year"></button>
     </div>
   </header>
 
   <main id="appContent"></main>
 
-  <button class="fab" id="openSheetBtn" aria-label="新增事項">＋</button>
+  <button class="fab" id="openSheetBtn" aria-label="Add">＋</button>
 
   <div class="sheet-backdrop" id="backdrop"></div>
   <div class="sheet" id="sheet">
     <div class="grabber"></div>
     <div class="sheet-header">
-      <button id="cancelBtn">取消</button>
-      <strong style="font-size:16px;" id="sheetTitle">新增任務</strong>
-      <button class="save" id="saveBtn">加入</button>
+      <button id="cancelBtn"></button>
+      <strong style="font-size:16px;" id="sheetTitle"></strong>
+      <button class="save" id="saveBtn"></button>
     </div>
     <div class="input-group">
-      <input type="text" id="taskInput" placeholder="想完成什麼事？（無時間限制）" />
+      <input type="text" id="taskInput" />
     </div>
     <div class="input-group">
-      <input type="text" id="noteInput" placeholder="補充備註（選填）" />
+      <input type="text" id="noteInput" />
     </div>
     <div class="input-group">
-      <span style="font-size:15px;">標記為重點事項 ★</span>
+      <span style="font-size:15px;" id="dailyLabel"></span>
+      <div class="toggle-switch" id="dailyToggle"><div class="toggle-knob"></div></div>
+    </div>
+    <div class="input-group">
+      <span style="font-size:15px;" id="focusLabel"></span>
       <div class="toggle-switch" id="focusToggle"><div class="toggle-knob"></div></div>
     </div>
   </div>
 
   <script>
-    // 動態產生 Apple 質感極簡方格紙 App Icon (180x180)
     (function generateAppleAppIcon() {
       const canvas = document.createElement('canvas');
       canvas.width = 180;
       canvas.height = 180;
       const ctx = canvas.getContext('2d');
-
-      // 純白極簡底色
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, 180, 180);
-
-      // 細緻方格線
-      ctx.strokeStyle = 'rgba(0, 122, 255, 0.10)';
-      ctx.lineWidth = 1.5;
-      for (let i = 30; i < 180; i += 30) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 180); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(180, i); ctx.stroke();
-      }
-
-      // 頂部 iOS 強調色裝飾條
       ctx.fillStyle = '#007AFF';
       ctx.beginPath();
-      ctx.roundRect(42, 42, 96, 12, 6);
+      ctx.roundRect(42, 44, 96, 12, 6);
       ctx.fill();
-
-      // 極簡打勾圓環
       ctx.strokeStyle = '#34C759';
       ctx.lineWidth = 8;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
-      ctx.moveTo(64, 106);
-      ctx.lineTo(82, 124);
-      ctx.lineTo(118, 84);
+      ctx.moveTo(64, 108);
+      ctx.lineTo(82, 126);
+      ctx.lineTo(118, 86);
       ctx.stroke();
-
-      const dataUrl = canvas.toDataURL('image/png');
-      document.getElementById('appIconLink').href = dataUrl;
-      document.getElementById('favIconLink').href = dataUrl;
+      const url = canvas.toDataURL('image/png');
+      document.getElementById('appIconLink').href = url;
+      document.getElementById('favIconLink').href = url;
     })();
 
-    const STORAGE_KEY = 'apple_grid_planner_v3';
-    const DEFAULT_MOODS = ['☀️ 充實', '🌿 平靜', '⚡️ 專注', '☁️ 疲憊', '✨ 靈感'];
+    const I18N = {
+      'zh-TW': {
+        langSwitch: 'EN',
+        today: '今天',
+        views: { day: '日', week: '週', month: '月', year: '年' },
+        todayPlan: '今日計畫',
+        planSuffix: '計畫',
+        weekPrefix: '第',
+        weekSuffix: '週',
+        monthSuffix: '月',
+        yearTitle: '年',
+        yearSub: '年度軌跡與目標',
+        todoTitle: '待辦清單',
+        deferBtn: '順延至明天 ↷',
+        deferredToast: (n) => `已順延 ${n} 項未完成任務至明天`,
+        emptyTasks: '沒有待辦事項，點擊右下角 ＋ 新增',
+        dailyBadge: '每天',
+        journalTitle: '隨手日記',
+        journalPlaceholder: '寫下今天的想法、心情或一件小事...',
+        autoSaved: '自動儲存',
+        savedToast: '已儲存 ✓',
+        chars: (n) => `${n} 字`,
+        newTask: '新增任務',
+        cancel: '取消',
+        add: '加入',
+        taskPlaceholder: '想完成什麼事？（無時間限制）',
+        notePlaceholder: '備註（選填）',
+        dailyToggle: '每天重複 ↻',
+        focusToggle: '標記重點 ★',
+        noTask: '無任務',
+        items: (d, t) => `${d}/${t} 項`,
+        clickPlan: '點擊規劃這一天或寫日記',
+        hasPlan: '有計畫',
+        hasJournal: '有日記',
+        summaryPrefix: '摘要',
+        openDay: '打開當日 ›',
+        tasksSummary: (d, t) => `任務：${d}/${t} 項完成`,
+        journalSummary: (txt) => `日記：${txt || '尚未撰寫'}`,
+        monthStats: (t, j) => `${t} 項計畫<br>${j} 篇日記`,
+        yearGoalTitle: '年度願景與關鍵字',
+        yearGoalPlaceholder: '寫下今年想達成的目標或關鍵字...',
+        addMoodPrompt: '輸入新的心情標籤（例如：☕️ 放空）：',
+        delMoodConfirm: (m) => `要移除「${m}」這個標籤嗎？`,
+        dows: ['日', '一', '二', '三', '四', '五', '六'],
+        weekDows: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'],
+        defaultMoods: ['☀️ 充實', '🌿 平靜', '⚡️ 專注', '☁️ 疲憊', '✨ 靈感'],
+        formatDate: (y, m, d, dow) => `${y}年${m}月${d}日 週${dow}`,
+        formatShortDate: (m, d) => `${m}/${d}`
+      },
+      'en': {
+        langSwitch: '中文',
+        today: 'Today',
+        views: { day: 'Day', week: 'Week', month: 'Month', year: 'Year' },
+        todayPlan: 'Today',
+        planSuffix: 'Plan',
+        weekPrefix: 'Week',
+        weekSuffix: '',
+        monthSuffix: '',
+        yearTitle: '',
+        yearSub: 'Year Overview & Goals',
+        todoTitle: 'To-Do',
+        deferBtn: 'Move to Tomorrow ↷',
+        deferredToast: (n) => `Moved ${n} unfinished item(s) to tomorrow`,
+        emptyTasks: 'No tasks yet. Tap ＋ to add one freely.',
+        dailyBadge: 'Daily',
+        journalTitle: 'Journal',
+        journalPlaceholder: 'Write down thoughts, reflections, or a moment from today...',
+        autoSaved: 'Auto-saved',
+        savedToast: 'Saved ✓',
+        chars: (n) => `${n} chars`,
+        newTask: 'New Task',
+        cancel: 'Cancel',
+        add: 'Add',
+        taskPlaceholder: 'What would you like to do? (No time required)',
+        notePlaceholder: 'Note (optional)',
+        dailyToggle: 'Repeat Every Day ↻',
+        focusToggle: 'Mark as Priority ★',
+        noTask: 'No tasks',
+        items: (d, t) => `${d}/${t} done`,
+        clickPlan: 'Tap to plan this day or write a note',
+        hasPlan: 'Tasks',
+        hasJournal: 'Journal',
+        summaryPrefix: 'Summary',
+        openDay: 'Open Day ›',
+        tasksSummary: (d, t) => `Tasks: ${d}/${t} completed`,
+        journalSummary: (txt) => `Journal: ${txt || 'Not written yet'}`,
+        monthStats: (t, j) => `${t} tasks<br>${j} notes`,
+        yearGoalTitle: 'Yearly Vision & Keywords',
+        yearGoalPlaceholder: 'Write your goals or themes for the year...',
+        addMoodPrompt: 'Enter a new mood tag (e.g. ☕️ Calm):',
+        delMoodConfirm: (m) => `Remove mood tag "${m}"?`,
+        dows: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        weekDows: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        defaultMoods: ['☀️ Good', '🌿 Calm', '⚡️ Focus', '☁️ Tired', '✨ Idea'],
+        formatDate: (y, m, d, dow) => `${dow}, ${m}/${d}/${y}`,
+        formatShortDate: (m, d) => `${m}/${d}`
+      }
+    };
+
+    const STORAGE_KEY = 'apple_ios_planner_v4';
+    let lang = localStorage.getItem('apple_ios_planner_lang') || 'zh-TW';
     let currentView = 'day';
     let selectedDate = toISO(new Date());
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
     let isFocus = false;
+    let isDaily = false;
+
+    const t = () => I18N[lang];
 
     function toISO(d) {
       const y = d.getFullYear();
@@ -706,17 +820,34 @@
       const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       return {
         days: raw.days || {},
+        dailyHabits: raw.dailyHabits || [],
         goals: raw.goals || {},
-        moods: raw.moods || [...DEFAULT_MOODS]
+        moods: raw.moods || [...I18N['zh-TW'].defaultMoods]
       };
     };
     const saveStore = (store) => localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 
     function getDayRecord(store, iso) {
       if (!store.days[iso]) {
-        store.days[iso] = { tasks: [], journal: '', mood: '' };
+        store.days[iso] = { tasks: [], doneHabits: [], journal: '', mood: '' };
       }
+      if (!store.days[iso].doneHabits) store.days[iso].doneHabits = [];
       return store.days[iso];
+    }
+
+    // 合併「當天一次性任務」與「每天重複計畫」
+    function getCombinedTasks(store, iso) {
+      const rec = getDayRecord(store, iso);
+      const habits = (store.dailyHabits || []).map(h => ({
+        id: h.id,
+        title: h.title,
+        note: h.note || '',
+        focus: !!h.focus,
+        daily: true,
+        done: rec.doneHabits.includes(h.id)
+      }));
+      const normal = (rec.tasks || []).map(x => ({ ...x, daily: false }));
+      return [...habits, ...normal];
     }
 
     function showToast(msg) {
@@ -729,18 +860,29 @@
     function initSample() {
       const store = loadStore();
       const today = toISO(new Date());
-      if (!store.days[today]) {
+      if (!store.days[today] && store.dailyHabits.length === 0) {
+        store.dailyHabits = [
+          { id: 101, title: '喝水 1500ml', note: '', focus: false }
+        ];
         store.days[today] = {
           tasks: [
-            { id: 1, title: '整理本週靈感筆記', note: '不限時段，有空再做', focus: true, done: false },
-            { id: 2, title: '閱讀 20 頁喜歡的書', note: '', focus: false, done: false }
+            { id: 1, title: '整理本週靈感筆記', note: '', focus: true, done: false }
           ],
-          journal: '今天沒有被時間追著跑，感覺步調很舒服。\n寫下三件值得開心的事：\n1. ',
-          mood: '☀️ 充實'
+          doneHabits: [],
+          journal: '',
+          mood: ''
         };
         saveStore(store);
       }
     }
+
+    document.getElementById('langBtn').onclick = () => {
+      lang = lang === 'zh-TW' ? 'en' : 'zh-TW';
+      localStorage.setItem('apple_ios_planner_lang', lang);
+      document.documentElement.lang = lang;
+      applyStaticI18n();
+      render();
+    };
 
     document.querySelectorAll('.seg-btn').forEach(btn => {
       btn.onclick = () => {
@@ -762,53 +904,71 @@
       render();
     };
 
+    function applyStaticI18n() {
+      const loc = t();
+      document.getElementById('langBtn').textContent = loc.langSwitch;
+      document.getElementById('todayBtn').textContent = loc.today;
+      document.querySelectorAll('.seg-btn').forEach(btn => {
+        btn.textContent = loc.views[btn.dataset.view];
+      });
+      document.getElementById('cancelBtn').textContent = loc.cancel;
+      document.getElementById('saveBtn').textContent = loc.add;
+      document.getElementById('taskInput').placeholder = loc.taskPlaceholder;
+      document.getElementById('noteInput').placeholder = loc.notePlaceholder;
+      document.getElementById('dailyLabel').textContent = loc.dailyToggle;
+      document.getElementById('focusLabel').textContent = loc.focusToggle;
+    }
+
     function render() {
+      const loc = t();
       const d = parseISO(selectedDate);
-      const daysName = ['日', '一', '二', '三', '四', '五', '六'];
       const sub = document.getElementById('subLabel');
       const title = document.getElementById('mainTitle');
       const fab = document.getElementById('openSheetBtn');
 
       if (currentView === 'day') {
-        sub.textContent = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 週${daysName[d.getDay()]}`;
-        title.textContent = selectedDate === toISO(new Date()) ? '今日計畫' : `${d.getMonth() + 1}/${d.getDate()} 計畫`;
+        sub.textContent = loc.formatDate(d.getFullYear(), d.getMonth() + 1, d.getDate(), loc.dows[d.getDay()]);
+        title.textContent = selectedDate === toISO(new Date())
+          ? loc.todayPlan
+          : `${loc.formatShortDate(d.getMonth() + 1, d.getDate())} ${loc.planSuffix}`.trim();
         fab.style.display = 'flex';
         renderDayView();
       } else if (currentView === 'week') {
-        sub.textContent = `${d.getFullYear()}年 第 ${getWeekNumber(d)} 週`;
-        title.textContent = '本週總覽';
+        sub.textContent = `${d.getFullYear()} ${loc.weekPrefix} ${getWeekNumber(d)} ${loc.weekSuffix}`.trim();
+        title.textContent = loc.views.week;
         fab.style.display = 'flex';
         renderWeekView();
       } else if (currentView === 'month') {
-        sub.textContent = `${calYear}年`;
-        title.textContent = `${calMonth + 1}月月曆`;
+        sub.textContent = `${calYear}`;
+        title.textContent = `${calMonth + 1}${loc.monthSuffix}`;
         fab.style.display = 'flex';
         renderMonthView();
       } else if (currentView === 'year') {
-        sub.textContent = '年度軌跡與目標';
-        title.textContent = `${calYear} 年`;
+        sub.textContent = loc.yearSub;
+        title.textContent = `${calYear} ${loc.yearTitle}`.trim();
         fab.style.display = 'none';
         renderYearView();
       }
     }
 
-    // 1. 日視圖
     function renderDayView() {
+      const loc = t();
       const store = loadStore();
       const rec = getDayRecord(store, selectedDate);
+      const combined = getCombinedTasks(store, selectedDate);
       const base = parseISO(selectedDate);
-      const days = ['日', '一', '二', '三', '四', '五', '六'];
 
       let stripHTML = '<div class="date-strip">';
       for (let i = -3; i <= 3; i++) {
         const dt = new Date(base);
         dt.setDate(base.getDate() + i);
         const iso = toISO(dt);
-        const dayData = store.days[iso];
-        const hasData = dayData && (dayData.tasks.length > 0 || (dayData.journal && dayData.journal.trim().length > 0));
+        const dayTasks = getCombinedTasks(store, iso);
+        const dayRec = store.days[iso];
+        const hasData = dayTasks.length > 0 || (dayRec && dayRec.journal && dayRec.journal.trim().length > 0);
         stripHTML += `
           <button class="day-pill ${iso === selectedDate ? 'active' : ''} ${hasData ? 'has-data' : ''}" onclick="selectDay('${iso}')">
-            <span class="dow">${days[dt.getDay()]}</span>
+            <span class="dow">${loc.dows[dt.getDay()]}</span>
             <span class="dom">${dt.getDate()}</span>
             <span class="dot"></span>
           </button>
@@ -816,22 +976,25 @@
       }
       stripHTML += '</div>';
 
-      const sorted = [...rec.tasks].sort((a, b) => (a.done - b.done) || (b.focus - a.focus));
-      const doneCount = rec.tasks.filter(t => t.done).length;
-      const undoneCount = rec.tasks.length - doneCount;
+      const sorted = [...combined].sort((a, b) => (a.done - b.done) || (b.focus - a.focus));
+      const doneCount = combined.filter(x => x.done).length;
+      const undoneCount = combined.length - doneCount;
 
-      const tasksHTML = sorted.length ? sorted.map(t => `
-        <div class="task-item ${t.done ? 'done' : ''}">
-          <div class="check-btn" onclick="toggleTask(${t.id})">
+      const tasksHTML = sorted.length ? sorted.map(item => `
+        <div class="task-item ${item.done ? 'done' : ''}">
+          <div class="check-btn" onclick="toggleTask(${item.id}, ${item.daily})">
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
-          <div class="task-info" onclick="toggleTask(${t.id})">
-            <div class="task-title">${t.focus ? '<span class="focus-star">★</span>' : ''}${escapeHTML(t.title)}</div>
-            ${t.note ? `<div class="task-note">${escapeHTML(t.note)}</div>` : ''}
+          <div class="task-info" onclick="toggleTask(${item.id}, ${item.daily})">
+            <div class="task-title">${item.focus ? '<span class="focus-star">★</span>' : ''}${escapeHTML(item.title)}</div>
+            <div class="task-meta-row">
+              ${item.daily ? `<span class="daily-tag">↻ ${loc.dailyBadge}</span>` : ''}
+              ${item.note ? `<span class="task-note">${escapeHTML(item.note)}</span>` : ''}
+            </div>
           </div>
-          <button class="del-btn" onclick="deleteTask(${t.id})">✕</button>
+          <button class="del-btn" onclick="deleteTask(${item.id}, ${item.daily})">✕</button>
         </div>
-      `).join('') : '<div class="empty-state">今天沒有待辦事項，點擊右下角 ＋ 自由新增</div>';
+      `).join('') : `<div class="empty-state">${loc.emptyTasks}</div>`;
 
       const moodHTML = store.moods.map((m, idx) => `
         <button class="mood-chip ${rec.mood === m ? 'active' : ''}"
@@ -842,24 +1005,24 @@
       document.getElementById('appContent').innerHTML = `
         ${stripHTML}
         <div class="section-header">
-          <span class="section-title">待辦清單</span>
+          <span class="section-title">${loc.todoTitle}</span>
           <div class="section-actions">
-            ${undoneCount > 0 ? `<button class="defer-btn" onclick="deferTasksToTomorrow()">順延至明天 ↷</button>` : ''}
-            <span class="section-badge">${doneCount} / ${rec.tasks.length}</span>
+            ${undoneCount > 0 ? `<button class="defer-btn" onclick="deferTasksToTomorrow()">${loc.deferBtn}</button>` : ''}
+            <span class="section-badge">${doneCount}/${combined.length}</span>
           </div>
         </div>
         <div class="ios-list">${tasksHTML}</div>
 
         <div class="section-header">
-          <span class="section-title">每日格線日記</span>
-          <span class="section-badge" id="saveStatus">自動儲存</span>
+          <span class="section-title">${loc.journalTitle}</span>
+          <span class="section-badge" id="saveStatus">${loc.autoSaved}</span>
         </div>
-        <div class="grid-journal-card">
+        <div class="journal-card">
           <div class="mood-bar">${moodHTML}</div>
-          <textarea class="journal-textarea" id="journalBox" placeholder="在方格紙上隨手寫下今天的想法、心情或三件小事...">${escapeHTML(rec.journal || '')}</textarea>
+          <textarea class="journal-textarea" id="journalBox" placeholder="${loc.journalPlaceholder}">${escapeHTML(rec.journal || '')}</textarea>
           <div class="journal-footer">
-            <span>Grid Journal</span>
-            <span id="charCount">${(rec.journal || '').length} 字</span>
+            <span>${loc.journalTitle}</span>
+            <span id="charCount">${loc.chars((rec.journal || '').length)}</span>
           </div>
         </div>
       `;
@@ -870,13 +1033,13 @@
         const r = getDayRecord(s, selectedDate);
         r.journal = box.value;
         saveStore(s);
-        document.getElementById('charCount').textContent = `${box.value.length} 字`;
-        document.getElementById('saveStatus').textContent = '已儲存 ✓';
+        document.getElementById('charCount').textContent = t().chars(box.value.length);
+        document.getElementById('saveStatus').textContent = t().savedToast;
       });
     }
 
-    // 2. 週視圖
     function renderWeekView() {
+      const loc = t();
       const store = loadStore();
       const base = parseISO(selectedDate);
       const dayOfWeek = base.getDay();
@@ -884,28 +1047,27 @@
       const monday = new Date(base);
       monday.setDate(base.getDate() + mondayOffset);
 
-      const daysName = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
       let html = '';
-
       for (let i = 0; i < 7; i++) {
         const dt = new Date(monday);
         dt.setDate(monday.getDate() + i);
         const iso = toISO(dt);
-        const rec = store.days[iso] || { tasks: [], journal: '', mood: '' };
-        const done = rec.tasks.filter(t => t.done).length;
-        const previewTasks = rec.tasks.slice(0, 2).map(t => `${t.done ? '✓' : '○'} ${t.title}`).join(' ');
+        const rec = store.days[iso] || { journal: '', mood: '' };
+        const items = getCombinedTasks(store, iso);
+        const done = items.filter(x => x.done).length;
+        const previewTasks = items.slice(0, 2).map(x => `${x.done ? '✓' : '○'} ${x.title}`).join(' ');
         const snippet = rec.journal ? rec.journal.trim().split('\n')[0].slice(0, 28) : '';
 
         html += `
           <div class="week-card" onclick="jumpToDay('${iso}')">
             <div class="week-card-head">
-              <span class="week-card-title">${daysName[i]} · ${dt.getMonth() + 1}/${dt.getDate()} ${rec.mood || ''}</span>
-              <span class="week-card-count">${rec.tasks.length ? `${done}/${rec.tasks.length} 項` : '無任務'}</span>
+              <span class="week-card-title">${loc.weekDows[i]} · ${loc.formatShortDate(dt.getMonth() + 1, dt.getDate())} ${rec.mood || ''}</span>
+              <span class="week-card-count">${items.length ? loc.items(done, items.length) : loc.noTask}</span>
             </div>
             <div class="week-preview">
               ${previewTasks ? `<div>${escapeHTML(previewTasks)}</div>` : ''}
               ${snippet ? `<div style="color:var(--purple);margin-top:3px;">✎ ${escapeHTML(snippet)}...</div>` : ''}
-              ${!previewTasks && !snippet ? '點擊規劃這一天或寫日記' : ''}
+              ${!previewTasks && !snippet ? loc.clickPlan : ''}
             </div>
           </div>
         `;
@@ -913,22 +1075,19 @@
       document.getElementById('appContent').innerHTML = html;
     }
 
-    // 3. 月視圖
     function renderMonthView() {
+      const loc = t();
       const store = loadStore();
       const firstDay = new Date(calYear, calMonth, 1).getDay();
       const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const dows = ['日', '一', '二', '三', '四', '五', '六'];
 
-      let cells = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
-      for (let i = 0; i < firstDay; i++) {
-        cells += `<div class="cal-cell empty"></div>`;
-      }
+      let cells = loc.dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+      for (let i = 0; i < firstDay; i++) cells += `<div class="cal-cell empty"></div>`;
 
       for (let day = 1; day <= daysInMonth; day++) {
         const iso = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const rec = store.days[iso];
-        const hasTask = rec && rec.tasks && rec.tasks.length > 0;
+        const hasTask = getCombinedTasks(store, iso).length > 0;
         const hasJournal = rec && rec.journal && rec.journal.trim().length > 0;
 
         cells += `
@@ -942,38 +1101,40 @@
         `;
       }
 
-      const selRec = store.days[selectedDate] || { tasks: [], journal: '', mood: '' };
+      const selRec = store.days[selectedDate] || { journal: '', mood: '' };
+      const selItems = getCombinedTasks(store, selectedDate);
+      const selDone = selItems.filter(x => x.done).length;
       const selDateObj = parseISO(selectedDate);
 
       document.getElementById('appContent').innerHTML = `
         <div class="calendar-card">
           <div class="cal-nav">
             <button onclick="changeMonth(-1)">‹</button>
-            <strong>${calYear}年 ${calMonth + 1}月</strong>
+            <strong>${calYear} / ${calMonth + 1}</strong>
             <button onclick="changeMonth(1)">›</button>
           </div>
           <div class="cal-grid">${cells}</div>
           <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:11px;color:var(--text-secondary);">
-            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;"></i>有計畫</span>
-            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--purple);margin-right:4px;"></i>有日記</span>
+            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;"></i>${loc.hasPlan}</span>
+            <span><i style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--purple);margin-right:4px;"></i>${loc.hasJournal}</span>
           </div>
         </div>
 
         <div class="week-card" onclick="jumpToDay('${selectedDate}')">
           <div class="week-card-head">
-            <span class="week-card-title">${selDateObj.getMonth() + 1}月${selDateObj.getDate()}日 摘要 ${selRec.mood || ''}</span>
-            <span style="color:var(--accent);font-size:13px;font-weight:600;">打開當日 ›</span>
+            <span class="week-card-title">${loc.formatShortDate(selDateObj.getMonth() + 1, selDateObj.getDate())} ${loc.summaryPrefix} ${selRec.mood || ''}</span>
+            <span style="color:var(--accent);font-size:13px;font-weight:600;">${loc.openDay}</span>
           </div>
           <div class="week-preview">
-            <div>任務：${selRec.tasks.length} 項（已完成 ${selRec.tasks.filter(t => t.done).length} 項）</div>
-            <div style="margin-top:4px;">日記：${selRec.journal ? escapeHTML(selRec.journal.slice(0, 50)) : '尚未撰寫'}</div>
+            <div>${loc.tasksSummary(selDone, selItems.length)}</div>
+            <div style="margin-top:4px;">${escapeHTML(loc.journalSummary(selRec.journal ? selRec.journal.slice(0, 45) : ''))}</div>
           </div>
         </div>
       `;
     }
 
-    // 4. 年視圖
     function renderYearView() {
+      const loc = t();
       const store = loadStore();
       let gridHTML = '<div class="year-grid">';
 
@@ -984,15 +1145,15 @@
 
         Object.keys(store.days).forEach(k => {
           if (k.startsWith(prefix)) {
-            taskCount += (store.days[k].tasks || []).length;
+            taskCount += (store.days[k].tasks || []).length + (store.dailyHabits || []).length;
             if (store.days[k].journal && store.days[k].journal.trim()) journalDays++;
           }
         });
 
         gridHTML += `
           <div class="month-box" onclick="jumpToMonth(${m})">
-            <h3>${m + 1} 月</h3>
-            <p>${taskCount} 項計畫<br>${journalDays} 篇日記</p>
+            <h3>${m + 1}${loc.monthSuffix}</h3>
+            <p>${loc.monthStats(taskCount, journalDays)}</p>
           </div>
         `;
       }
@@ -1003,15 +1164,15 @@
       document.getElementById('appContent').innerHTML = `
         <div class="cal-nav" style="background:var(--bg-secondary);padding:10px 14px;border-radius:14px;margin-bottom:14px;">
           <button onclick="changeYear(-1)">‹</button>
-          <strong>${calYear} 年度總覽</strong>
+          <strong>${calYear}</strong>
           <button onclick="changeYear(1)">›</button>
         </div>
         ${gridHTML}
         <div class="section-header">
-          <span class="section-title">${calYear} 年度關鍵字與願景</span>
+          <span class="section-title">${loc.yearGoalTitle}</span>
         </div>
-        <div class="grid-journal-card">
-          <textarea class="journal-textarea" style="min-height:100px;" id="yearGoalBox" placeholder="寫下今年想達成的目標、想去的地方或年度關鍵字...">${escapeHTML(yearGoal)}</textarea>
+        <div class="journal-card">
+          <textarea class="journal-textarea" style="min-height:100px;" id="yearGoalBox" placeholder="${loc.yearGoalPlaceholder}">${escapeHTML(yearGoal)}</textarea>
         </div>
       `;
 
@@ -1024,36 +1185,39 @@
       });
     }
 
-    // 互動與順延功能
+    // 順延當天一次性未完成任務至隔天
     window.deferTasksToTomorrow = () => {
       const store = loadStore();
       const rec = getDayRecord(store, selectedDate);
-      const undone = rec.tasks.filter(t => !t.done);
-      if (!undone.length) return;
+      const undoneNormal = (rec.tasks || []).filter(x => !x.done);
+      const undoneHabits = (store.dailyHabits || []).filter(h => !rec.doneHabits.includes(h.id));
+      const totalMoved = undoneNormal.length + undoneHabits.length;
+      if (!totalMoved) return;
 
       const nextDate = parseISO(selectedDate);
       nextDate.setDate(nextDate.getDate() + 1);
       const nextISO = toISO(nextDate);
       const nextRec = getDayRecord(store, nextISO);
 
-      rec.tasks = rec.tasks.filter(t => t.done);
-      undone.forEach((t, i) => {
-        nextRec.tasks.push({ ...t, id: Date.now() + i });
+      rec.tasks = (rec.tasks || []).filter(x => x.done);
+      undoneNormal.forEach((x, idx) => {
+        nextRec.tasks.push({ ...x, id: Date.now() + idx });
+      });
+      undoneHabits.forEach((h, idx) => {
+        nextRec.tasks.push({ id: Date.now() + 100 + idx, title: h.title, note: h.note || '', focus: !!h.focus, done: false });
       });
 
       saveStore(store);
       render();
-      showToast(`已將 ${undone.length} 項未完成任務順延至明天`);
+      showToast(t().deferredToast(totalMoved));
     };
 
     window.addCustomMood = () => {
-      const text = prompt('輸入新的心情標籤（例如：☕️ 放空）：');
+      const text = prompt(t().addMoodPrompt);
       if (!text || !text.trim()) return;
       const store = loadStore();
-      const label = text.trim().slice(0, 12);
-      if (!store.moods.includes(label)) {
-        store.moods.push(label);
-      }
+      const label = text.trim().slice(0, 14);
+      if (!store.moods.includes(label)) store.moods.push(label);
       const rec = getDayRecord(store, selectedDate);
       rec.mood = label;
       saveStore(store);
@@ -1064,7 +1228,7 @@
       const store = loadStore();
       if (store.moods.length <= 1) return;
       const removed = store.moods[idx];
-      if (confirm(`要移除「${removed}」這個標籤嗎？`)) {
+      if (confirm(t().delMoodConfirm(removed))) {
         store.moods.splice(idx, 1);
         saveStore(store);
         renderDayView();
@@ -1093,19 +1257,29 @@
     };
     window.changeYear = (delta) => { calYear += delta; renderYearView(); };
 
-    window.toggleTask = (id) => {
+    window.toggleTask = (id, isDailyItem) => {
       const store = loadStore();
       const rec = getDayRecord(store, selectedDate);
-      const t = rec.tasks.find(x => x.id === id);
-      if (t) t.done = !t.done;
+      if (isDailyItem) {
+        const idx = rec.doneHabits.indexOf(id);
+        if (idx >= 0) rec.doneHabits.splice(idx, 1);
+        else rec.doneHabits.push(id);
+      } else {
+        const item = rec.tasks.find(x => x.id === id);
+        if (item) item.done = !item.done;
+      }
       saveStore(store);
       render();
     };
 
-    window.deleteTask = (id) => {
+    window.deleteTask = (id, isDailyItem) => {
       const store = loadStore();
-      const rec = getDayRecord(store, selectedDate);
-      rec.tasks = rec.tasks.filter(x => x.id !== id);
+      if (isDailyItem) {
+        store.dailyHabits = (store.dailyHabits || []).filter(h => h.id !== id);
+      } else {
+        const rec = getDayRecord(store, selectedDate);
+        rec.tasks = (rec.tasks || []).filter(x => x.id !== id);
+      }
       saveStore(store);
       render();
     };
@@ -1131,10 +1305,11 @@
     }[tag]));
     const escapeAttr = (str) => String(str).replace(/'/g, "\\'");
 
-    // Bottom Sheet
+    // Sheet
     const sheet = document.getElementById('sheet');
     const backdrop = document.getElementById('backdrop');
-    const toggle = document.getElementById('focusToggle');
+    const focusToggle = document.getElementById('focusToggle');
+    const dailyToggle = document.getElementById('dailyToggle');
 
     const closeSheet = () => {
       sheet.classList.remove('open');
@@ -1144,7 +1319,7 @@
 
     document.getElementById('openSheetBtn').onclick = () => {
       const d = parseISO(selectedDate);
-      document.getElementById('sheetTitle').textContent = `新增至 ${d.getMonth() + 1}/${d.getDate()}`;
+      document.getElementById('sheetTitle').textContent = `${t().newTask} · ${t().formatShortDate(d.getMonth() + 1, d.getDate())}`;
       sheet.classList.add('open');
       backdrop.classList.add('open');
       setTimeout(() => document.getElementById('taskInput').focus(), 200);
@@ -1152,7 +1327,18 @@
 
     document.getElementById('cancelBtn').onclick = closeSheet;
     backdrop.onclick = closeSheet;
-    toggle.onclick = () => { isFocus = !isFocus; toggle.classList.toggle('on', isFocus); };
+
+    focusToggle.onclick = () => {
+      isFocus = !isFocus;
+      focusToggle.classList.toggle('on', isFocus);
+      focusToggle.classList.toggle('orange', isFocus);
+    };
+
+    dailyToggle.onclick = () => {
+      isDaily = !isDaily;
+      dailyToggle.classList.toggle('on', isDaily);
+      dailyToggle.classList.toggle('blue', isDaily);
+    };
 
     document.getElementById('saveBtn').onclick = () => {
       const title = document.getElementById('taskInput').value.trim();
@@ -1160,19 +1346,26 @@
       if (!title) return;
 
       const store = loadStore();
-      const rec = getDayRecord(store, selectedDate);
-      rec.tasks.push({ id: Date.now(), title, note, focus: isFocus, done: false });
+      if (isDaily) {
+        store.dailyHabits.push({ id: Date.now(), title, note, focus: isFocus });
+      } else {
+        const rec = getDayRecord(store, selectedDate);
+        rec.tasks.push({ id: Date.now(), title, note, focus: isFocus, done: false });
+      }
       saveStore(store);
 
       document.getElementById('taskInput').value = '';
       document.getElementById('noteInput').value = '';
       isFocus = false;
-      toggle.classList.remove('on');
+      isDaily = false;
+      focusToggle.classList.remove('on', 'orange');
+      dailyToggle.classList.remove('on', 'blue');
       closeSheet();
       render();
     };
 
     initSample();
+    applyStaticI18n();
     render();
   </script>
 </body>
