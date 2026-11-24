@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <!-- iOS PWA 原生全螢幕設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="每日計畫" />
+  <title>每日計畫</title>
+  <style>
+    :root {
+      --bg-primary: #F2F2F7;
+      --bg-secondary: #FFFFFF;
+      --bg-tertiary: #E5E5EA;
+      --text-primary: #000000;
+      --text-secondary: #8E8E93;
+      --accent: #007AFF;
+      --green: #34C759;
+      --orange: #FF9500;
+      --red: #FF3B30;
+      --separator: rgba(60, 60, 67, 0.12);
+      --glass: rgba(242, 242, 247, 0.82);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #000000;
+        --bg-secondary: #1C1C1E;
+        --bg-tertiary: #2C2C2E;
+        --text-primary: #FFFFFF;
+        --text-secondary: #8E8E93;
+        --accent: #0A84FF;
+        --green: #30D158;
+        --orange: #FF9F0A;
+        --red: #FF453A;
+        --separator: rgba(84, 84, 88, 0.36);
+        --glass: rgba(0, 0, 0, 0.82);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: calc(96px + env(safe-area-inset-bottom));
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 頂部毛玻璃導覽列 */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--glass);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      padding: calc(12px + env(safe-area-inset-top)) 20px 12px;
+      margin-top: calc(-1 * env(safe-area-inset-top));
+      border-bottom: 0.5px solid var(--separator);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .date-sub {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.2px;
+    }
+
+    h1 {
+      margin: 2px 0 0;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    /* 日期橫向選擇器 */
+    .date-strip {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+      gap: 6px;
+    }
+
+    .day-pill {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+      border-radius: 14px;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.2s ease;
+    }
+
+    .day-pill:active { transform: scale(0.94); }
+    .day-pill.active {
+      background: var(--accent);
+      color: #FFFFFF;
+    }
+    .day-pill .dow { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
+    .day-pill .dom { font-size: 16px; font-weight: 600; }
+
+    /* 主內容區 */
+    main {
+      padding: 16px 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* 進度總覽卡片 */
+    .summary-card {
+      background: var(--bg-secondary);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .summary-text h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .summary-text p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .ring-wrap {
+      position: relative;
+      width: 52px;
+      height: 52px;
+    }
+
+    .ring-wrap svg { transform: rotate(-90deg); }
+    .ring-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* 區塊標題 */
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 0 0 8px 6px;
+      letter-spacing: 0.3px;
+    }
+
+    /* iOS Inset Grouped List */
+    .ios-list {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 0.5px solid var(--separator);
+      transition: background-color 0.15s ease;
+    }
+
+    .task-item:last-child { border-bottom: none; }
+    .task-item:active { background-color: var(--bg-tertiary); }
+
+    .check-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--text-secondary);
+      margin-right: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .task-item.done .check-btn {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .check-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: #fff;
+      stroke-width: 3;
+      fill: none;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s ease;
+    }
+
+    .task-item.done .check-btn svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .task-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 16px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: opacity 0.2s;
+    }
+
+    .task-item.done .task-title {
+      text-decoration: line-through;
+      color: var(--text-secondary);
+    }
+
+    .task-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 18px;
+      padding: 4px 6px;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* 底部懸浮新增按鈕（適配 Home 橫條） */
+    .fab {
+      position: fixed;
+      right: 22px;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      width: 56px;
+      height: 56px;
+      border-radius: 28px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-size: 28px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
+      cursor: pointer;
+      z-index: 30;
+      transition: transform 0.15s ease;
+    }
+    .fab:active { transform: scale(0.92); }
+
+    /* iOS 原生 Bottom Sheet 彈窗 */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-secondary);
+      border-radius: 22px 22px 0 0;
+      padding: 12px 20px calc(24px + env(safe-area-inset-bottom));
+      z-index: 50;
+      transform: translateY(100%);
+      transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .sheet.open { transform: translateY(0); }
+
+    .grabber {
+      width: 36px;
+      height: 5px;
+      background: var(--bg-tertiary);
+      border-radius: 3px;
+      margin: 0 auto 14px;
+    }
+
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .sheet-header button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 4px 0;
+    }
+    .sheet-header button.save { font-weight: 600; }
+
+    .input-group {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .input-group input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 16px;
+      outline: none;
+    }
+
+    .input-group label {
+      font-size: 15px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      margin-right: 12px;
+    }
+
+    input[type="time"] {
+      width: auto !important;
+      font-size: 15px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .toggle-switch {
+      width: 48px;
+      height: 28px;
+      border-radius: 14px;
+      background: var(--bg-tertiary);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-switch.on { background: var(--green); }
+    .toggle-knob {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .toggle-switch.on .toggle-knob { transform: translateX(20px); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div>
+        <div class="date-sub" id="fullDateLabel">2026年11月24日</div>
+        <h1>今日計畫</h1>
+      </div>
+    </div>
+    <div class="date-strip" id="dateStrip"></div>
+  </header>
+
+  <main>
+    <div class="summary-card">
+      <div class="summary-text">
+        <h2 id="progressTitle">準備開始新的一天</h2>
+        <p id="progressSub">點擊右下角 + 新增今日任務</p>
+      </div>
+      <div class="ring-wrap">
+        <svg width="52" height="52">
+          <circle cx="26" cy="26" r="21" stroke="var(--bg-tertiary)" stroke-width="5" fill="none" />
+          <circle id="progressRing" cx="26" cy="26" r="21" stroke="var(--green)" stroke-width="5" fill="none"
+                  stroke-dasharray="131.95" stroke-dashoffset="131.95" stroke-linecap="round" />
+        </svg>
+        <div class="ring-label" id="progressPct">0%</div>
+      </div>
+    </div>
+
+    <div class="section-title">今日焦點</div>
+    <div class="ios-list" id="focusList"></div>
+
+    <div class="section-title">時間軸與待辦</div>
+    <div class="ios-list" id="scheduleList"></div>
+  </main>
+
+  <button class="fab" id="openSheetBtn" aria-label="新增事項">＋</button>
+
+  <div class="sheet-backdrop" id="backdrop"></div>
+  <div class="sheet" id="sheet">
+    <div class="grabber"></div>
+    <div class="sheet-header">
+      <button id="cancelBtn">取消</button>
+      <strong style="font-size:16px;">新增計畫</strong>
+      <button class="save" id="saveBtn">加入</button>
+    </div>
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="輸入待辦事項，例如：晨間閱讀 30 分鐘" />
+    </div>
+    <div class="input-group">
+      <label>時間</label>
+      <input type="time" id="timeInput" value="09:00" />
+    </div>
+    <div class="input-group">
+      <label>設為「今日焦點」</label>
+      <div class="toggle-switch" id="focusToggle"><div class="toggle-knob"></div></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'apple_minimal_planner_v1';
+    let selectedDate = new Date().toISOString().split('T')[0];
+    let isFocus = false;
+
+    const loadData = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const saveData = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+    function initDefaultData() {
+      const data = loadData();
+      if (!data[selectedDate]) {
+        data[selectedDate] = [
+          { id: 1, title: '檢視今日核心目標', time: '08:30', focus: true, done: false },
+          { id: 2, title: '專注工作時段（無干擾）', time: '10:00', focus: false, done: false },
+          { id: 3, title: '傍晚散步或伸展運動', time: '18:30', focus: false, done: false }
+        ];
+        saveData(data);
+      }
+    }
+
+    function renderDateStrip() {
+      const strip = document.getElementById('dateStrip');
+      strip.innerHTML = '';
+      const base = new Date();
+      const days = ['日', '一', '二', '三', '四', '五', '六'];
+
+      for (let i = -2; i <= 4; i++) {
+        const d = new Date(base);
+        d.setDate(base.getDate() + i);
+        const iso = d.toISOString().split('T')[0];
+
+        const btn = document.createElement('button');
+        btn.className = 'day-pill' + (iso === selectedDate ? ' active' : '');
+        btn.innerHTML = `<span class="dow">週${days[d.getDay()]}</span><span class="dom">${d.getDate()}</span>`;
+        btn.onclick = () => {
+          selectedDate = iso;
+          updateHeaderDate(d);
+          renderDateStrip();
+          renderTasks();
+        };
+        strip.appendChild(btn);
+      }
+    }
+
+    function updateHeaderDate(d) {
+      document.getElementById('fullDateLabel').textContent =
+        `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+    }
+
+    function renderTasks() {
+      const data = loadData();
+      const tasks = (data[selectedDate] || []).sort((a, b) => a.time.localeCompare(b.time));
+      const focusList = document.getElementById('focusList');
+      const scheduleList = document.getElementById('scheduleList');
+
+      const focusTasks = tasks.filter(t => t.focus);
+      const normalTasks = tasks.filter(t => !t.focus);
+
+      focusList.innerHTML = focusTasks.length
+        ? focusTasks.map(taskHTML).join('')
+        : '<div class="empty-state">尚未設定今日焦點</div>';
+
+      scheduleList.innerHTML = normalTasks.length
+        ? normalTasks.map(taskHTML).join('')
+        : '<div class="empty-state">目前沒有排程事項</div>';
+
+      updateProgress(tasks);
+    }
+
+    function taskHTML(t) {
+      const color = t.focus ? 'var(--orange)' : 'var(--accent)';
+      return `
+        <div class="task-item ${t.done ? 'done' : ''}" onclick="toggleTask(${t.id})">
+          <div class="check-btn">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div class="task-info">
+            <div class="task-title">${escapeHTML(t.title)}</div>
+            <div class="task-meta">
+              <span class="tag-dot" style="background:${color}"></span>
+              <span>${t.time}</span>
+            </div>
+          </div>
+          <button class="del-btn" onclick="deleteTask(event, ${t.id})">✕</button>
+        </div>
+      `;
+    }
+
+    function updateProgress(tasks) {
+      const total = tasks.length;
+      const done = tasks.filter(t => t.done).length;
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      const circumference = 131.95;
+      const offset = circumference - (pct / 100) * circumference;
+
+      document.getElementById('progressRing').style.strokeDashoffset = offset;
+      document.getElementById('progressPct').textContent = `${pct}%`;
+      document.getElementById('progressTitle').textContent =
+        total === 0 ? '今日尚無計畫' : (pct === 100 ? '今日任務全數完成！' : `已完成 ${done} / ${total} 項`);
+      document.getElementById('progressSub').textContent =
+        total === 0 ? '點擊右下角 + 開始規劃' : `還有 ${total - done} 項待完成`;
+    }
+
+    window.toggleTask = (id) => {
+      const data = loadData();
+      const task = (data[selectedDate] || []).find(t => t.id === id);
+      if (task) task.done = !task.done;
+      saveData(data);
+      renderTasks();
+    };
+
+    window.deleteTask = (e, id) => {
+      e.stopPropagation();
+      const data = loadData();
+      data[selectedDate] = (data[selectedDate] || []).filter(t => t.id !== id);
+      saveData(data);
+      renderTasks();
+    };
+
+    const escapeHTML = (str) => str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag]));
+
+    // Sheet 控制
+    const sheet = document.getElementById('sheet');
+    const backdrop = document.getElementById('backdrop');
+    const toggle = document.getElementById('focusToggle');
+
+    const closeSheet = () => {
+      sheet.classList.remove('open');
+      backdrop.classList.remove('open');
+      document.getElementById('taskInput').blur();
+    };
+
+    document.getElementById('openSheetBtn').onclick = () => {
+      sheet.classList.add('open');
+      backdrop.classList.add('open');
+      setTimeout(() => document.getElementById('taskInput').focus(), 200);
+    };
+
+    document.getElementById('cancelBtn').onclick = closeSheet;
+    backdrop.onclick = closeSheet;
+
+    toggle.onclick = () => {
+      isFocus = !isFocus;
+      toggle.classList.toggle('on', isFocus);
+    };
+
+    document.getElementById('saveBtn').onclick = () => {
+      const title = document.getElementById('taskInput').value.trim();
+      const time = document.getElementById('timeInput').value || '09:00';
+      if (!title) return;
+
+      const data = loadData();
+      if (!data[selectedDate]) data[selectedDate] = [];
+      data[selectedDate].push({
+        id: Date.now(),
+        title,
+        time,
+        focus: isFocus,
+        done: false
+      });
+      saveData(data);
+
+      document.getElementById('taskInput').value = '';
+      isFocus = false;
+      toggle.classList.remove('on');
+      closeSheet();
+      renderTasks();
+    };
+
+    initDefaultData();
+    updateHeaderDate(new Date());
+    renderDateStrip();
+    renderTasks();
+  </script>
+</body>
+</html>
